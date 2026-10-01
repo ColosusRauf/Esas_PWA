@@ -35,7 +35,7 @@ export default function AdminApp({ session, onLogout }) {
   return (
     <div style={{ display: "flex", background: "var(--bg)", minHeight: "100vh" }}>
       <AdminSidebar active={view} onNavigate={(v) => go(v)} session={session} onLogout={onLogout} />
-      <main style={{ flex: 1, padding: "22px 34px", maxWidth: 1180, minWidth: 0 }}>
+      <main className="page">
         <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 12, marginBottom: 6 }}>
           {state.loading && <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>Memuat data…</span>}
           <button onClick={load} disabled={state.loading} style={{ ...ghostBtn, display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px" }}>

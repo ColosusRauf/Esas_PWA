@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Download, LogOut } from "lucide-react";
-import Sidebar from "../components/Sidebar.jsx";
+import { Download, LogOut, Smartphone } from "lucide-react";
+import Layout from "../components/Layout.jsx";
+import { Card, primaryBtn, ghostBtn } from "../components/ui.jsx";
 
 export default function Settings({ patientId, onNavigate, onLogout }) {
   const [installEvent, setInstallEvent] = useState(null);
@@ -26,40 +27,43 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
     setInstallEvent(null);
   }
 
-  const btn = {
-    display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 10,
-    fontSize: 14, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border)",
-    background: "var(--surface)", color: "var(--ink)"
-  };
-
   return (
-    <div style={{ display: "flex", background: "var(--bg)", minHeight: "100vh" }}>
-      <Sidebar active="settings" onNavigate={onNavigate} patientId={patientId} onLogout={onLogout} />
-      <main style={{ flex: 1, padding: "22px 34px", maxWidth: 720 }}>
-        <h2 style={{ fontSize: 20, margin: "0 0 20px", color: "var(--ink)" }}>Pengaturan</h2>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: 22, display: "flex", flexDirection: "column", gap: 22 }}>
-          <section>
-            <div style={{ fontWeight: 700, color: "var(--ink)", marginBottom: 4 }}>Pasang aplikasi</div>
-            <p style={{ fontSize: 13, color: "var(--ink-soft)", margin: "0 0 10px" }}>
-              {installed
-                ? "ESAS sudah terpasang di perangkat ini."
-                : installEvent
-                ? "Pasang ESAS di layar utama agar bisa dibuka seperti aplikasi biasa."
-                : "Buka menu browser lalu pilih “Tambahkan ke layar utama” untuk memasang ESAS."}
-            </p>
-            {installEvent && !installed && (
-              <button onClick={install} style={{ ...btn, background: "var(--primary)", color: "#fff", border: "none" }}>
-                <Download size={16} /> Pasang ESAS
-              </button>
-            )}
-          </section>
-          <section>
-            <button onClick={onLogout} style={{ ...btn, color: "var(--severe)" }}>
-              <LogOut size={16} /> Keluar
-            </button>
-          </section>
-        </div>
-      </main>
-    </div>
+    <Layout active="settings" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
+      title="Pengaturan" subtitle="Atur aplikasi dan akun Anda.">
+      <div className="grid-2" style={{ alignItems: "start" }}>
+        <Card>
+          <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+            <div style={{ width: 58, height: 58, borderRadius: 16, background: "var(--primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Smartphone size={27} color="var(--primary)" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 19, color: "var(--ink)", marginBottom: 6 }}>Pasang aplikasi</div>
+              <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: "0 0 18px", lineHeight: 1.6 }}>
+                {installed
+                  ? "ESAS sudah terpasang di perangkat ini."
+                  : installEvent
+                  ? "Pasang ESAS di layar utama agar bisa dibuka seperti aplikasi biasa."
+                  : "Buka menu browser lalu pilih “Tambahkan ke layar utama” untuk memasang ESAS."}
+              </p>
+              {installEvent && !installed && (
+                <button onClick={install} style={{ ...primaryBtn, display: "inline-flex", alignItems: "center", gap: 10 }}>
+                  <Download size={18} /> Pasang ESAS
+                </button>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <div style={{ fontWeight: 700, fontSize: 19, color: "var(--ink)", marginBottom: 6 }}>Akun</div>
+          <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: "0 0 18px", lineHeight: 1.6 }}>
+            Anda masuk sebagai Pasien <strong style={{ color: "var(--ink)" }}>{patientId}</strong>. Keluar bila memakai perangkat bersama.
+          </p>
+          <button onClick={onLogout} style={{ ...ghostBtn, color: "var(--severe)", display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <LogOut size={18} /> Keluar
+          </button>
+        </Card>
+      </div>
+    </Layout>
   );
 }
