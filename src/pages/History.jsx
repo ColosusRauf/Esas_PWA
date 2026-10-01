@@ -11,13 +11,13 @@ export default function History({ patientId, assessments, onNavigate, onLogout }
   const openItem = assessments.find((a) => a.id === openId);
 
   const breakdownData = openItem
-    ? DOMAINS.map((d, i) => ({ name: d.label.split(" (")[0], value: openItem.answers[i] }))
+    ? DOMAINS.map((d, i) => ({ name: d.label.split(" (")[0].replace(/^Rasa /, "").replace(" Umum", ""), value: openItem.answers[i] }))
     : [];
 
   return (
     <Layout active="history" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
       title="Riwayat Assessment" subtitle="Lihat riwayat penilaian ESAS Anda. Pilih satu baris untuk melihat rinciannya.">
-      <div className="grid-2" style={{ alignItems: "start" }}>
+      <div className="grid-2 fit-fill history-grid">
         <Card>
           {reversed.length === 0 ? (
             <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>Belum ada riwayat assessment.</p>
@@ -45,24 +45,24 @@ export default function History({ patientId, assessments, onNavigate, onLogout }
 
         {openItem ? (
           <Card title={`${openItem.tanggal} · Total Skor: ${totalOf(openItem.answers)}`}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 14, marginBottom: 26 }}>
+            <div className="tiles" style={{ display: "grid", gap: 10, marginBottom: "clamp(10px, 2vh, 20px)", flexShrink: 0 }}>
               {DOMAINS.map((d, i) => {
                 const v = openItem.answers[i];
                 const sev = severity(v);
                 return (
-                  <div key={d.key} style={{ border: "1px solid var(--border)", borderRadius: 14, padding: "14px 16px" }}>
-                    <div style={{ fontSize: 13.5, color: "var(--ink-soft)", marginBottom: 6 }}>{d.label.split(" (")[0]}</div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: SEV_COLOR[sev], lineHeight: 1.1 }}>{v}</div>
+                  <div key={d.key} style={{ border: "1px solid var(--border)", borderRadius: 14, padding: "clamp(8px, 1.4vh, 13px) 14px" }}>
+                    <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{d.label.split(" (")[0].replace(/^Rasa /, "").replace(" Umum", "")}</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: SEV_COLOR[sev], lineHeight: 1.1 }}>{v}</div>
                     <div style={{ fontSize: 12.5, color: SEV_COLOR[sev], marginTop: 3 }}>{SEV_LABEL[sev]}</div>
                   </div>
                 );
               })}
             </div>
-            <div style={{ height: 330 }} role="img" aria-label="Grafik skor per gejala">
+            <div className="chart-box" role="img" aria-label="Grafik skor per gejala">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={breakdownData} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11.5, fill: "var(--ink-soft)" }} axisLine={false} tickLine={false} interval={0} height={100} angle={-35} textAnchor="end" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11.5, fill: "var(--ink-soft)" }} axisLine={false} tickLine={false} interval={0} height={70} angle={-30} textAnchor="end" />
                   <YAxis domain={[0, 10]} tick={{ fontSize: 12.5, fill: "var(--ink-soft)" }} axisLine={false} tickLine={false} width={30} />
                   <Tooltip contentStyle={{ fontSize: 13.5, borderRadius: 12, border: "1px solid var(--border)" }} formatter={(v) => [v, "Skor"]} />
                   <Bar dataKey="value" fill="#2563EB" radius={[4, 4, 0, 0]} isAnimationActive={false} />

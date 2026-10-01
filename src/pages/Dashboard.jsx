@@ -28,11 +28,11 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
   return (
     <Layout active="dashboard" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
       title={`Halo, Pasien ${patientId}`} subtitle="Tetap semangat! Kesehatan Anda adalah prioritas kami.">
-      <div className="grid-2" style={{ marginBottom: 24 }}>
-        <Card style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 24 }}>
+      <div className="grid-2 fit-top">
+        <Card bodyStyle={{ justifyContent: "space-between", gap: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
             <div style={{
-              width: 64, height: 64, borderRadius: 18, background: "var(--primary-soft)",
+              width: 56, height: 56, borderRadius: 16, background: "var(--primary-soft)",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               <Icon size={30} color="var(--primary)" />
@@ -44,15 +44,15 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
               </div>
             </div>
           </div>
-          <button onClick={onStartAssessment} style={{ ...primaryBtn, width: "100%", padding: "16px 20px", fontSize: 16.5, borderRadius: 14 }}>
+          <button onClick={onStartAssessment} style={{ ...primaryBtn, width: "100%", padding: "14px 20px", fontSize: 16, borderRadius: 14 }}>
             {doneToday ? "Isi lagi" : "Mulai ESAS"}
           </button>
         </Card>
 
         <Card title="Ringkasan Skor">
-          <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
-            <ScoreRing value={total} size={150} />
-            <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+            <ScoreRing value={total} size={128} />
+            <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 9 }}>
               {topSymptoms.length === 0 && <span style={{ fontSize: 15, color: "var(--ink-soft)" }}>Belum ada data</span>}
               {topSymptoms.map((s) => (
                 <div key={s.key} style={{ display: "flex", justifyContent: "space-between", fontSize: 15.5 }}>
@@ -65,7 +65,7 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
         </Card>
       </div>
 
-      <div className="grid-2">
+      <div className="grid-2 fit-fill">
         <Card title="Riwayat Assessment" action={<button onClick={() => onNavigate("history")} style={linkBtn}>Lihat Semua</button>}>
           {assessments.length === 0 ? (
             <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>Belum ada riwayat. Mulai assessment pertama Anda.</p>
@@ -86,7 +86,7 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
         </Card>
 
         <Card title="Grafik Skor Terakhir">
-          <div style={{ height: 290 }} role="img" aria-label="Grafik total skor assessment terakhir">
+          <div className="chart-box" role="img" aria-label="Grafik total skor assessment terakhir">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trend} margin={{ top: 8, right: 14, left: 0, bottom: 0 }}>
                 <CartesianGrid stroke="var(--border)" vertical={false} />

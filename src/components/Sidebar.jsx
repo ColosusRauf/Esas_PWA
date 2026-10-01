@@ -12,10 +12,10 @@ const ITEMS = [
 export default function Sidebar({ active, onNavigate, patientId, onLogout }) {
   return (
     <aside className="sidebar" style={{
-      width: 264, flexShrink: 0, background: "var(--surface)", borderRight: "1px solid var(--border)",
-      display: "flex", flexDirection: "column", padding: "28px 18px", minHeight: "100vh"
+      width: 248, flexShrink: 0, background: "var(--surface)", borderRight: "1px solid var(--border)",
+      display: "flex", flexDirection: "column", padding: "22px 16px", minHeight: "100vh"
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "0 10px", marginBottom: 38 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "0 10px", marginBottom: 26 }}>
         <div style={{
           width: 40, height: 40, borderRadius: 11, background: "var(--primary)",
           display: "flex", alignItems: "center", justifyContent: "center"

@@ -4,10 +4,10 @@ import Sidebar from "./Sidebar.jsx";
 
 function Topbar({ patientId }) {
   return (
-    <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 30 }}>
+    <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: "clamp(10px, 2vh, 22px)" }}>
       <label className="topbar-search" style={{
         display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", border: "1px solid var(--border)",
-        borderRadius: 14, padding: "0 18px", height: 50, width: "min(440px, 100%)", cursor: "text",
+        borderRadius: 14, padding: "0 18px", height: 44, width: "min(420px, 100%)", cursor: "text",
       }}>
         <Search size={19} color="var(--ink-soft)" />
         <input placeholder="Cari..." aria-label="Cari" style={{
@@ -17,7 +17,7 @@ function Topbar({ patientId }) {
 
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginLeft: "auto" }}>
         <button aria-label="Notifikasi" style={{
-          width: 50, height: 50, borderRadius: "50%", background: "var(--surface)", border: "1px solid var(--border)",
+          width: 44, height: 44, borderRadius: "50%", background: "var(--surface)", border: "1px solid var(--border)",
           display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0,
         }}>
           <Bell size={21} color="var(--ink-soft)" />
@@ -44,14 +44,14 @@ function Topbar({ patientId }) {
 
 export default function Layout({ active, patientId, onNavigate, onLogout, title, subtitle, children }) {
   return (
-    <div style={{ display: "flex", background: "var(--bg)", minHeight: "100vh" }}>
+    <div className="shell" style={{ display: "flex", background: "var(--bg)", minHeight: "100vh" }}>
       <Sidebar active={active} onNavigate={onNavigate} patientId={patientId} onLogout={onLogout} />
-      <main className="page">
+      <main className="page page-fit">
         <Topbar patientId={patientId} />
-        <h1 style={{ fontSize: 30, margin: "0 0 6px", color: "var(--ink)", letterSpacing: "-0.01em" }}>{title}</h1>
-        {subtitle && <p style={{ fontSize: 16, color: "var(--ink-soft)", margin: "0 0 28px" }}>{subtitle}</p>}
-        {!subtitle && <div style={{ height: 22 }} />}
-        {children}
+        <h1 style={{ fontSize: 26, margin: "0 0 4px", color: "var(--ink)", letterSpacing: "-0.01em" }}>{title}</h1>
+        {subtitle && <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: "0 0 clamp(12px, 2.4vh, 22px)" }}>{subtitle}</p>}
+        {!subtitle && <div style={{ height: 14 }} />}
+        <div className="fit-body">{children}</div>
       </main>
     </div>
   );

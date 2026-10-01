@@ -18,8 +18,8 @@ export default function Profile({ patientId, assessments, onNavigate, onLogout }
   return (
     <Layout active="profile" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
       title="Profil" subtitle="Informasi akun dan ringkasan pemantauan Anda.">
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 380px) 1fr", gap: 24, alignItems: "start" }} className="profile-grid">
-        <Card style={{ textAlign: "center", padding: 36 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 380px) 1fr", gap: 20, alignItems: "start" }} className="profile-grid">
+        <Card style={{ textAlign: "center" }} bodyStyle={{ justifyContent: "center" }}>
           <div style={{
             width: 104, height: 104, borderRadius: "50%", background: "var(--primary-soft)", color: "var(--primary)",
             display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 36, margin: "0 auto 18px",
@@ -34,9 +34,9 @@ export default function Profile({ patientId, assessments, onNavigate, onLogout }
           </div>
         </Card>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24 }}>
+        <div className="stats-col">
           {stats.map((s) => (
-            <Card key={s.label} style={{ display: "flex", gap: 18, alignItems: "center" }}>
+            <Card key={s.label} bodyStyle={{ flexDirection: "row", gap: 18, alignItems: "center", justifyContent: "flex-start" }}>
               <div style={{ width: 58, height: 58, borderRadius: 16, background: "var(--primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <s.icon size={27} color="var(--primary)" />
               </div>
