@@ -17,7 +17,12 @@ async function sb(path, init = {}) {
   const key = process.env.SUPABASE_SERVICE_KEY;
   const r = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${path}`, {
     ...init,
-    headers: { apikey: key, Authorization: `Bearer ${key}`, "content-type": "application/json", ...init.headers },
+         headers: {
+         apikey: key,
+         ...(String(key).startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}),
+         "content-type": "application/json",
+         ...init.headers,
+       },
   });
   if (!r.ok) {
     const e = new Error(`supabase ${path} -> ${r.status}`);
