@@ -109,7 +109,7 @@ button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .history-grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
 }
 
-.stats-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.stats-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
 @media (max-width: 1100px) { .profile-grid { grid-template-rows: none !important; } }
 
 /* Landing page */
