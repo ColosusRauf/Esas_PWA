@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg"],
+      includeAssets: ["favicon.svg", "img/*.svg"],
       workbox: { navigateFallbackDenylist: [/^\/api/] },
       manifest: {
         name: "ESAS - Monitoring Gejala Pasca Kemoterapi",

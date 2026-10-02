@@ -82,3 +82,58 @@ button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .stats-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
 @media (max-width: 1100px) { .profile-grid { grid-template-rows: none !important; } }
+
+/* Landing page */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.l-header { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 48px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.94); backdrop-filter: blur(8px); }
+.l-brand { display: flex; align-items: center; gap: 9px; background: none; border: none; padding: 0; cursor: pointer; }
+.l-logo { width: 30px; height: 30px; border-radius: 9px; background: var(--primary); display: flex; align-items: center; justify-content: center; }
+.l-nav { display: flex; gap: 8px; }
+.l-link { background: none; border: none; cursor: pointer; font-size: 14.5px; color: var(--ink-soft); padding: 8px 14px; border-radius: 9px; font-weight: 500; }
+.l-link:hover { color: var(--ink); background: var(--primary-soft); }
+.l-link.on { color: var(--primary); font-weight: 700; }
+.l-section { scroll-margin-top: 64px; padding: 72px 48px; }
+.l-alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.l-hero { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 48px; min-height: calc(100vh - 64px); padding-top: 40px; padding-bottom: 40px; }
+.l-row { display: flex; align-items: center; gap: 56px; }
+.l-inner { max-width: 1180px; margin: 0 auto; }
+.l-col { flex: 1; min-width: 0; }
+.l-img { display: flex; justify-content: center; }
+.l-img img { width: 100%; max-width: 500px; height: auto; }
+.l-h1 { font-size: 46px; line-height: 1.16; margin: 0 0 16px; color: var(--ink); font-weight: 800; letter-spacing: -0.01em; }
+.l-h2 { font-size: 32px; line-height: 1.2; margin: 6px 0 14px; color: var(--ink); font-weight: 800; letter-spacing: -0.01em; }
+.l-eyebrow { font-size: 13px; font-weight: 700; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase; }
+.l-lead { font-size: 16.5px; color: var(--ink-soft); line-height: 1.75; max-width: 520px; margin: 0 0 26px; }
+.l-btn { border-radius: 10px; padding: 13px 26px; font-size: 15px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+.l-btn-primary { background: var(--primary); color: #fff; }
+.l-btn-primary:hover { filter: brightness(0.94); }
+.l-btn-ghost { background: var(--surface); color: var(--ink); border-color: var(--border); }
+.l-btn-ghost:hover { background: var(--primary-soft); }
+.l-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.l-points li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--ink); }
+.l-ico { width: 38px; height: 38px; border-radius: 11px; background: var(--primary-soft); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.l-feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+.l-feat { display: flex; gap: 13px; align-items: flex-start; padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.l-contact { display: flex; align-items: center; gap: 12px; font-size: 15.5px; color: var(--ink); text-decoration: none; font-weight: 600; }
+.l-footer { text-align: center; padding: 26px 16px; font-size: 13px; color: var(--ink-soft); }
+@media (max-width: 860px) {
+  .l-header { padding: 10px 16px; }
+  .l-link { padding: 8px 9px; font-size: 13.5px; }
+  .l-section { padding: 48px 20px; }
+  .l-hero, .l-row { flex-direction: column; gap: 28px; min-height: 0; }
+  .l-hero { min-height: 0; }
+  .l-row .l-img { order: -1; }
+  .l-hero .l-img { order: -1; }
+  .l-h1 { font-size: 34px; }
+  .l-h2 { font-size: 26px; }
+  .l-img img { max-width: 340px; }
+  .l-feat-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .l-header { gap: 6px; padding: 10px 10px; }
+  .l-brand span:last-child { display: none; }
+  .l-nav { gap: 0; }
+  .l-link { padding: 8px 7px; font-size: 13px; }
+  .l-login { padding: 8px 14px !important; font-size: 13px !important; }
+}
