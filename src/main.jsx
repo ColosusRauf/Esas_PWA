@@ -5,6 +5,7 @@ import { ThemeProvider } from "./theme.jsx";
 import { LangProvider } from "./i18n.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import "./pwa.js";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(

@@ -438,3 +438,12 @@ body, .shell, .sidebar, .card-hover { transition: background-color .25s, border-
   .hist-bar .dates input { width: 100%; }
   .hist-meta .chip { padding: 7px 14px; }
 }
+
+/* Pengaturan di HP: kartu tidak boleh melebar */
+.grid-2 > * { min-width: 0; }
+@media (max-width: 960px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 820px) {
+  .set-ico { display: none !important; }
+  .seg { max-width: 100%; }
+  .seg button { padding: 7px 10px; font-size: 13px; }
+}

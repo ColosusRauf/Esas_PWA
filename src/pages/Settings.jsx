@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useInstall } from "../pwa.js";
 import { Download, LogOut, Smartphone, Palette, BellRing, ShieldCheck } from "lucide-react";
 import Layout from "../components/Layout.jsx";
 import { Card, primaryBtn, ghostBtn } from "../components/ui.jsx";
@@ -19,29 +20,8 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
   const app = useApp();
   const toast = useToast();
   const push = app.push;
-  const [installEvent, setInstallEvent] = useState(null);
-  const [installed, setInstalled] = useState(
-    typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches
-  );
+  const inst = useInstall();
   const [pushErr, setPushErr] = useState("");
-
-  useEffect(() => {
-    const onPrompt = (e) => { e.preventDefault(); setInstallEvent(e); };
-    const onInstalled = () => { setInstalled(true); setInstallEvent(null); };
-    window.addEventListener("beforeinstallprompt", onPrompt);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onPrompt);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
-  }, []);
-
-  async function install() {
-    if (!installEvent) return;
-    installEvent.prompt();
-    await installEvent.userChoice;
-    setInstallEvent(null);
-  }
 
   const errKey = (e) =>
     e.message === "DENIED" ? "se.reminder.denied" : e.message === "NOT_CONFIGURED" ? "se.reminder.notConfigured" :
@@ -67,7 +47,7 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
         <div className="grid-2" style={{ alignItems: "start" }}>
           <Card>
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div style={iconBox}><Palette size={25} color="var(--primary)" /></div>
+              <div className="set-ico" style={iconBox}><Palette size={25} color="var(--primary)" /></div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={heading}>{t("se.appearance")}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -86,7 +66,7 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
 
           <Card>
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div style={iconBox}><BellRing size={25} color="var(--primary)" /></div>
+              <div className="set-ico" style={iconBox}><BellRing size={25} color="var(--primary)" /></div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={heading}>{t("se.reminder")}</div>
                 {push.status === "unsupported" && <p style={text}>{t("se.reminder.unsupported")}</p>}
@@ -115,16 +95,24 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
 
           <Card>
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div style={iconBox}><Smartphone size={25} color="var(--primary)" /></div>
+              <div className="set-ico" style={iconBox}><Smartphone size={25} color="var(--primary)" /></div>
               <div style={{ flex: 1 }}>
                 <div style={heading}>{t("se.install")}</div>
-                <p style={text}>
-                  {installed ? t("se.installed") : installEvent ? t("se.installReady") : t("se.installHow")}
-                </p>
-                {installEvent && !installed && (
-                  <button onClick={install} style={{ ...primaryBtn, display: "inline-flex", alignItems: "center", gap: 10 }}>
-                    <Download size={18} /> {t("se.installBtn")}
-                  </button>
+                {inst.installed ? (
+                  <p style={text}>{t("se.installed")}</p>
+                ) : (
+                  <>
+                    {inst.canPrompt ? (
+                      <>
+                        <p style={text}>{t("se.installReady")}</p>
+                        <button onClick={inst.prompt} style={{ ...primaryBtn, display: "inline-flex", alignItems: "center", gap: 10 }}>
+                          <Download size={18} /> {t("se.installBtn")}
+                        </button>
+                      </>
+                    ) : (
+                      <InstallSteps inst={inst} />
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -132,7 +120,7 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
 
           <Card>
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div style={iconBox}><ShieldCheck size={25} color="var(--primary)" /></div>
+              <div className="set-ico" style={iconBox}><ShieldCheck size={25} color="var(--primary)" /></div>
               <div style={{ flex: 1 }}>
                 <div style={heading}>{t("se.privacyCard")}</div>
                 <p style={{ ...text, marginBottom: 6 }}>{t("se.privacyText")}</p>
@@ -150,5 +138,21 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
         </div>
       </div>
     </Layout>
+  );
+}
+
+// Petunjuk pasang sesuai perangkat (iPhone tidak punya tombol pasang otomatis)
+export function InstallSteps({ inst }) {
+  const { t } = useLang();
+  const key = inst.platform === "ios" ? "ios" : inst.platform === "android" ? "android" : "other";
+  const n = key === "ios" ? 4 : key === "android" ? 3 : 1;
+  return (
+    <div>
+      {inst.inApp && <p className="alert-err" style={{ marginBottom: 10 }}>{t("in.inapp")}</p>}
+      <div style={{ fontWeight: 600, fontSize: 14.5, color: "var(--ink)", marginBottom: 6 }}>{t(`in.${key}.title`)}</div>
+      <ol style={{ margin: 0, paddingLeft: 20, color: "var(--ink-soft)", fontSize: 14.5, lineHeight: 1.6 }}>
+        {Array.from({ length: n }, (_, i) => <li key={i} style={{ marginBottom: 4 }}>{t(`in.${key}.${i + 1}`)}</li>)}
+      </ol>
+    </div>
   );
 }

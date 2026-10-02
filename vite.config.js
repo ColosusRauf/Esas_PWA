@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "img/*.svg", "push-sw.js"],
+      includeAssets: ["favicon.svg", "img/*.svg", "push-sw.js", "apple-touch-icon.png"],
       workbox: { importScripts: ["push-sw.js"], navigateFallbackDenylist: [/^\/api/] },
       manifest: {
         name: "ESAS - Monitoring Gejala Pasca Kemoterapi",
@@ -20,6 +20,7 @@ export default defineConfig({
         orientation: "portrait",
         background_color: "#F5F8FE",
         theme_color: "#2563EB",
+        id: "/",
         icons: [
           { src: "pwa-192.png", sizes: "192x192", type: "image/png" },
           { src: "pwa-512.png", sizes: "512x512", type: "image/png" },
