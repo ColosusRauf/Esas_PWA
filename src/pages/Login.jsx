@@ -12,7 +12,7 @@ export default function Login({ onLogin, loading, error, onBack, onPrivacy }) {
   const [staff, setStaff] = useState(false);
 
   return (
-    <div style={{
+    <div className="lg-root" style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
       background: "var(--bg)", padding: 24, flexDirection: "column", gap: 14
     }}>
@@ -22,11 +22,11 @@ export default function Login({ onLogin, loading, error, onBack, onPrivacy }) {
         )}
         <div className="l-tools"><LangSegment compact /><ThemeButton /></div>
       </div>
-      <div style={{
+      <div className="lg-card" style={{
         display: "flex", width: "100%", maxWidth: 920, minHeight: 480, borderRadius: 22,
         overflow: "hidden", border: "1px solid var(--border)", boxShadow: "0 24px 60px -30px rgba(30,41,59,0.3)"
       }}>
-        <div style={{
+        <div className="lg-hero" style={{
           flex: 1, minWidth: 300, background: "linear-gradient(160deg, var(--primary) 0%, #1E3A8A 100%)",
           color: "#fff", padding: "48px 40px", display: "flex", flexDirection: "column", justifyContent: "center"
         }}>
@@ -45,8 +45,13 @@ export default function Login({ onLogin, loading, error, onBack, onPrivacy }) {
           </p>
         </div>
 
-        <div style={{ flex: 1, minWidth: 300, background: "var(--surface)", padding: "48px 40px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <h2 style={{ fontSize: 22, margin: "0 0 4px", color: "var(--ink)" }}>{t("lg.welcome")}</h2>
+        <div className="lg-form" style={{ flex: 1, minWidth: 300, background: "var(--surface)", padding: "48px 40px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div className="lg-mini">
+            <div className="lg-logo"><HeartPulse size={34} color="var(--primary)" /></div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: "var(--ink)" }}>ESAS</div>
+            <div style={{ fontSize: 15, color: "var(--ink-soft)", marginTop: 2 }}>{t("lg.mini")}</div>
+          </div>
+          <h2 className="lg-welcome" style={{ fontSize: 22, margin: "0 0 4px", color: "var(--ink)" }}>{t("lg.welcome")}</h2>
           <p style={{ fontSize: 13.5, color: "var(--ink-soft)", margin: "0 0 26px" }}>
             {staff ? t("lg.sub.staff") : t("lg.sub")}
           </p>

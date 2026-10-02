@@ -84,6 +84,7 @@ const D = {
   "lg.welcome": ["Selamat Datang", "Welcome"],
   "lg.sub": ["Silakan login dengan Patient ID Anda", "Please log in with your Patient ID"],
   "lg.sub.staff": ["Silakan login dengan akun petugas / peneliti", "Please log in with your staff / researcher account"],
+  "lg.mini": ["Masuk ke akun Anda", "Log in to your account"],
   "lg.id": ["Patient ID", "Patient ID"],
   "lg.id.staff": ["Username petugas", "Staff username"],
   "lg.id.ph": ["Masukkan Patient ID", "Enter your Patient ID"],

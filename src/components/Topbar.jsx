@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search, Bell, User, LayoutDashboard, ClipboardList, History as HistoryIcon, Settings as SettingsIcon,
-  ShieldCheck, CalendarDays, Activity, AlertTriangle, CloudUpload, BellRing, CalendarPlus,
+  ShieldCheck, CalendarDays, HeartPulse, X, Activity, AlertTriangle, CloudUpload, BellRing, CalendarPlus,
 } from "lucide-react";
 import { useApp } from "../appContext.jsx";
 import { useLang } from "../i18n.jsx";
@@ -202,12 +202,24 @@ function BellMenu() {
 
 export default function Topbar({ patientId }) {
   const { t } = useLang();
+  const [ms, setMs] = useState(false); // kotak cari terbuka (HP)
+  function openSearch() {
+    setMs((v) => !v);
+    setTimeout(() => document.querySelector(".sr-wrap input")?.focus(), 30);
+  }
   return (
-    <header className="topbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: "clamp(10px, 2vh, 22px)" }}>
+    <header className={"topbar" + (ms ? " ms-open" : "")} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: "clamp(10px, 2vh, 22px)" }}>
+      <div className="m-brand">
+        <span className="l-logo" style={{ width: 34, height: 34, borderRadius: 10 }}><HeartPulse size={19} color="#fff" /></span>
+        <span style={{ fontWeight: 800, fontSize: 21, color: "var(--ink)" }}>ESAS</span>
+      </div>
       <SearchBox />
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginLeft: "auto" }}>
+      <div className="tb-right" style={{ display: "flex", alignItems: "center", gap: 14, marginLeft: "auto" }}>
+        <button className="m-only icon-btn tb-circle" aria-label={t("search.aria")} onClick={openSearch}>
+          {ms ? <X size={19} /> : <Search size={19} />}
+        </button>
         <BellMenu />
-        <div style={{
+        <div className="user-chip" style={{
           display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", border: "1px solid var(--border)",
           borderRadius: 999, padding: "6px 18px 6px 6px",
         }}>

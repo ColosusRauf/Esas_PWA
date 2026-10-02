@@ -6,10 +6,13 @@ import ScoreRing from "../components/ScoreRing.jsx";
 import { Card, linkBtn, th, td, primaryBtn } from "../components/ui.jsx";
 import { DOMAINS, totalOf, dShort } from "../data.js";
 import { useLang } from "../i18n.jsx";
+import { useMobile } from "../useMedia.js";
+import RecordCard from "../components/RecordCard.jsx";
 import { fmtDate, fmtShort, dayKeyWIB, todayKeyWIB } from "../format.js";
 
 export default function Dashboard({ patientId, assessments, onNavigate, onLogout, onStartAssessment }) {
   const { t, lang } = useLang();
+  const mobile = useMobile();
   const latest = assessments[assessments.length - 1];
   const total = latest ? totalOf(latest.answers) : 0;
   const doneToday = !!latest && dayKeyWIB(latest.createdAt) === todayKeyWIB();
@@ -70,18 +73,26 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
           {assessments.length === 0 ? (
             <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>{t("dash.emptyHistory")}</p>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><th style={th}>{t("common.date")}</th><th style={th}>{t("common.total")}</th><th style={th}>{t("common.status")}</th></tr></thead>
-              <tbody>
-                {[...assessments].reverse().slice(0, 5).map((a) => (
-                  <tr key={a.id}>
-                    <td style={td}>{fmtDate(a.createdAt, lang)}</td>
-                    <td style={{ ...td, fontWeight: 600 }}>{totalOf(a.answers)}</td>
-                    <td style={td}><span style={{ color: a.synced ? "var(--mild)" : "var(--moderate)", fontWeight: 600 }}>● {a.synced ? t("st.done") : t("st.pending")}</span></td>
-                  </tr>
+mobile ? (
+              <div>
+                {[...assessments].reverse().slice(0, 4).map((a) => (
+                  <RecordCard key={a.id} a={a} onClick={() => onNavigate("history", { openId: a.id })} />
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr><th style={th}>{t("common.date")}</th><th style={th}>{t("common.total")}</th><th style={th}>{t("common.status")}</th></tr></thead>
+                <tbody>
+                  {[...assessments].reverse().slice(0, 5).map((a) => (
+                    <tr key={a.id}>
+                      <td style={td}>{fmtDate(a.createdAt, lang)}</td>
+                      <td style={{ ...td, fontWeight: 600 }}>{totalOf(a.answers)}</td>
+                      <td style={td}><span style={{ color: a.synced ? "var(--mild)" : "var(--moderate)", fontWeight: 600 }}>● {a.synced ? t("st.done") : t("st.pending")}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )
           )}
         </Card>
 

@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, GitCompareArrows, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { ArrowLeft, ChevronDown, ChevronUp, GitCompareArrows, X } from "lucide-react";
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import Layout from "../components/Layout.jsx";
 import { Card, th, td } from "../components/ui.jsx";
 import { useApp } from "../appContext.jsx";
 import { useLang } from "../i18n.jsx";
+import { useMobile } from "../useMedia.js";
+import RecordCard from "../components/RecordCard.jsx";
 import { DOMAINS, totalOf, severity, SEV_COLOR, SEV_LABEL_L } from "../data.js";
 import { fmtDate, dayKeyWIB, todayKeyWIB } from "../format.js";
 
@@ -14,10 +17,11 @@ const daysAgoKey = (n) => dayKeyWIB(new Date(Date.now() - n * 86400000).toISOStr
 
 export default function History({ patientId, assessments, onNavigate, onLogout }) {
   const { t, lang } = useLang();
+  const mobile = useMobile();
   const app = useApp();
   const wanted = app?.navState?.openId ?? null;
-  const [openId, setOpenId] = useState(wanted ?? assessments[assessments.length - 1]?.id ?? null);
-  const touched = useRef(!!wanted);
+  const [openId, setOpenId] = useState(wanted ?? (mobile ? null : assessments[assessments.length - 1]?.id) ?? null);
+  const touched = useRef(!!wanted || mobile);
   const [preset, setPreset] = useState("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -87,32 +91,56 @@ export default function History({ patientId, assessments, onNavigate, onLogout }
                 {filtered.length === 0 ? (
                   <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: "8px 0 0" }}>{t("hi.noResult")}</p>
                 ) : (
-                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead><tr>{cmp && <th style={th} />}<th style={th}>{t("common.date")}</th><th style={th}>{t("common.total")}</th><th style={th}>{t("common.status")}</th>{!cmp && <th style={th} />}</tr></thead>
-                    <tbody>
+mobile ? (
+                    <div>
                       {filtered.map((a) => {
-                        const isOpen = !cmp && openId === a.id;
                         const pi = picks.indexOf(a.id);
-                        const sel = isOpen || pi >= 0;
                         return (
-                          <tr key={a.id} className={"hist-row" + (sel ? " sel" : "")} onClick={() => clickRow(a)} style={{ cursor: "pointer" }}>
-                            {cmp && <td style={{ ...td, paddingLeft: 10, width: 34 }}>{pi >= 0 ? <span className="cmp-tag">{pi + 1}</span> : <span className="cmp-tag" style={{ background: "transparent", border: "1.5px solid var(--border)" }} />}</td>}
-                            <td style={{ ...td, paddingLeft: cmp ? 0 : 12 }}>{fmtDate(a.createdAt, lang)}</td>
-                            <td style={{ ...td, fontWeight: 700 }}>{totalOf(a.answers)}</td>
-                            <td style={td}><span style={{ color: a.synced ? "var(--mild)" : "var(--moderate)", fontWeight: 600 }}>● {a.synced ? t("st.done") : t("st.pending")}</span></td>
-                            {!cmp && <td style={{ ...td, textAlign: "right", color: "var(--ink-soft)", paddingRight: 12 }}>{isOpen ? <ChevronUp size={19} /> : <ChevronDown size={19} />}</td>}
-                          </tr>
+                          <RecordCard key={a.id} a={a} selected={pi >= 0} onClick={() => clickRow(a)}
+                            tag={pi >= 0 ? <span className="cmp-tag">{pi + 1}</span> : cmp ? <span className="cmp-tag" style={{ background: "transparent", border: "1.5px solid var(--border)" }} /> : undefined} />
                         );
                       })}
-                    </tbody>
-                  </table>
+                    </div>
+                  ) : (
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                      <thead><tr>{cmp && <th style={th} />}<th style={th}>{t("common.date")}</th><th style={th}>{t("common.total")}</th><th style={th}>{t("common.status")}</th>{!cmp && <th style={th} />}</tr></thead>
+                      <tbody>
+                        {filtered.map((a) => {
+                          const isOpen = !cmp && openId === a.id;
+                          const pi = picks.indexOf(a.id);
+                          const sel = isOpen || pi >= 0;
+                          return (
+                            <tr key={a.id} className={"hist-row" + (sel ? " sel" : "")} onClick={() => clickRow(a)} style={{ cursor: "pointer" }}>
+                              {cmp && <td style={{ ...td, paddingLeft: 10, width: 34 }}>{pi >= 0 ? <span className="cmp-tag">{pi + 1}</span> : <span className="cmp-tag" style={{ background: "transparent", border: "1.5px solid var(--border)" }} />}</td>}
+                              <td style={{ ...td, paddingLeft: cmp ? 0 : 12 }}>{fmtDate(a.createdAt, lang)}</td>
+                              <td style={{ ...td, fontWeight: 700 }}>{totalOf(a.answers)}</td>
+                              <td style={td}><span style={{ color: a.synced ? "var(--mild)" : "var(--moderate)", fontWeight: 600 }}>● {a.synced ? t("st.done") : t("st.pending")}</span></td>
+                              {!cmp && <td style={{ ...td, textAlign: "right", color: "var(--ink-soft)", paddingRight: 12 }}>{isOpen ? <ChevronUp size={19} /> : <ChevronDown size={19} />}</td>}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )
                 )}
               </div>
             </>
           )}
         </Card>
 
-        {cmp ? (
+        {mobile ? (
+          (cmp ? !!pair : !!openItem) && createPortal(
+            <div className="sheet" role="dialog" aria-modal="true">
+              <div className="sheet-head">
+                <button className="icon-btn" onClick={() => (cmp ? setPicks([]) : setOpenId(null))} aria-label={t("common.back")}><ArrowLeft size={18} /></button>
+                <b>{t("hi.title")}</b>
+              </div>
+              {cmp ? <Compare a={pair[0]} b={pair[1]} /> : <Detail item={openItem} />}
+            </div>,
+            document.body
+          )
+        ) : (
+        cmp ? (
           pair ? <Compare a={pair[0]} b={pair[1]} /> : (
             <Card><p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>{t("hi.compare.pick")}</p></Card>
           )
@@ -120,6 +148,7 @@ export default function History({ patientId, assessments, onNavigate, onLogout }
           <Detail item={openItem} />
         ) : (
           <Card><p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>{t("hi.pick")}</p></Card>
+        )
         )}
       </div>
     </Layout>
