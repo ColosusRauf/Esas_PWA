@@ -3,8 +3,8 @@ import { User, ShieldCheck, CalendarClock, FlaskConical, HeartPulse, ClipboardLi
 
 // Isi data kontak di sini. Bagian yang dikosongkan ("") tidak akan ditampilkan.
 const CONTACT = {
-  email: "",
-  phone: "",
+  email: "hafizavv@gmail.com",
+  phone: "+62 852 1071 3255",
   note: "Untuk pertanyaan seputar akun atau penggunaan aplikasi, hubungi peneliti atau tenaga kesehatan yang mendampingi Anda.",
 };
 
