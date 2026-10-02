@@ -98,7 +98,6 @@ export default function Landing({ onGetStarted, onLogin }) {
   return (
     <div ref={rootRef} onPointerDown={ripple} style={{ minHeight: "100vh", background: "var(--bg)" }} className={"landing" + (anim ? " anim" : "") + (scrolled ? " scrolled" : "")}>
       <header className="l-header">
-        <span className="l-progress" aria-hidden="true" />
         <button onClick={() => goTo("home")} className="l-brand" aria-label="ESAS — ke atas">
           <span className="l-logo"><HeartPulse size={17} color="#fff" /></span>
           <span style={{ fontWeight: 700, fontSize: 18, color: "var(--ink)" }}>ESAS</span>
