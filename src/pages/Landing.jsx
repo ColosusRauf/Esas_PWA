@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLang } from "../i18n.jsx";
 import { LangSegment, ThemeButton } from "../components/Toggles.jsx";
 import { CONTACT } from "../contact.js";
+import { useTheme } from "../theme.jsx";
 import { User, ShieldCheck, CalendarClock, FlaskConical, HeartPulse, ClipboardList, LineChart, Smartphone, LogIn, Mail, Phone, ArrowUp } from "lucide-react";
 
 const NAV = [
@@ -29,6 +30,12 @@ function goTo(id) {
   if (!el) return;
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+}
+
+// Mode gelap memakai versi gambar tanpa latar (hanya karakter & objek)
+function Illus({ name, ...rest }) {
+  const { resolved } = useTheme();
+  return <img src={`/img/${name}${resolved === "dark" ? "-dark" : ""}.svg`} {...rest} />;
 }
 
 export default function Landing({ onGetStarted, onLogin, onPrivacy }) {
@@ -121,14 +128,14 @@ export default function Landing({ onGetStarted, onLogin, onPrivacy }) {
           </div>
         </div>
         <div className="l-col l-img l-hero-img">
-          <img className="l-float" src="/img/hero.svg" alt={t("ld.heroAlt")} width="500" height="500" />
+          <Illus name="hero" className="l-float"  alt={t("ld.heroAlt")} width="500" height="500" />
         </div>
       </section>
 
       <section id="about" className="l-section l-alt">
         <div className="l-row l-inner">
           <div className="l-col l-img reveal from-left">
-            <img src="/img/about.svg" alt={t("ld.aboutAlt")} width="500" height="500" loading="lazy" />
+            <Illus name="about"  alt={t("ld.aboutAlt")} width="500" height="500" loading="lazy" />
           </div>
           <div className="l-col reveal from-right">
             <span className="l-eyebrow">{t("ld.about.eyebrow")}</span>
@@ -164,7 +171,7 @@ export default function Landing({ onGetStarted, onLogin, onPrivacy }) {
             </div>
           </div>
           <div className="l-col l-img reveal from-right">
-            <img src="/img/features.svg" alt={t("ld.featAlt")} width="500" height="500" loading="lazy" />
+            <Illus name="features"  alt={t("ld.featAlt")} width="500" height="500" loading="lazy" />
           </div>
         </div>
       </section>
@@ -172,7 +179,7 @@ export default function Landing({ onGetStarted, onLogin, onPrivacy }) {
       <section id="contact" className="l-section l-alt">
         <div className="l-row l-inner">
           <div className="l-col l-img reveal from-left">
-            <img src="/img/contact.svg" alt={t("ld.contactAlt")} width="500" height="500" loading="lazy" />
+            <Illus name="contact"  alt={t("ld.contactAlt")} width="500" height="500" loading="lazy" />
           </div>
           <div className="l-col reveal from-right">
             <span className="l-eyebrow">{t("ld.contact.eyebrow")}</span>

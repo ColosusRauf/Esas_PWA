@@ -271,7 +271,6 @@ button[role="radio"][aria-checked="true"] { animation: l-popsel .28s var(--ease)
 
 /* ===== Tema gelap: penyesuaian ===== */
 body, .shell, .sidebar, .card-hover { transition: background-color .25s, border-color .25s, color .25s; }
-:root[data-theme="dark"] .l-img img { background: #F5F8FE; border-radius: 28px; padding: 12px; }
 :root[data-theme="dark"] .recharts-default-tooltip { background: var(--surface) !important; border-color: var(--border) !important; color: var(--ink); }
 :root[data-theme="dark"] .recharts-tooltip-label, :root[data-theme="dark"] .recharts-tooltip-item { color: var(--ink) !important; }
 :root[data-theme="dark"] .recharts-cartesian-axis-tick-value { fill: var(--ink-soft); }
@@ -373,3 +372,6 @@ body, .shell, .sidebar, .card-hover { transition: background-color .25s, border-
   .l-section { scroll-margin-top: 100px; }
 }
 .landing { overflow-x: clip; }
+
+/* Peralihan halus antar bagian (tanpa garis potong) */
+.l-alt { position: relative; border: none; background: linear-gradient(to bottom, var(--bg) 0, var(--surface) 160px, var(--surface) calc(100% - 160px), var(--bg) 100%); }

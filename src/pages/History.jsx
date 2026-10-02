@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, GitCompareArrows, X } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import Layout from "../components/Layout.jsx";
 import { Card, th, td } from "../components/ui.jsx";
 import { useApp } from "../appContext.jsx";
@@ -151,7 +151,9 @@ function Detail({ item }) {
             <XAxis dataKey="name" tick={{ fontSize: 11.5, fill: "var(--ink-soft)" }} axisLine={false} tickLine={false} interval={0} height={70} angle={-30} textAnchor="end" />
             <YAxis domain={[0, 10]} tick={{ fontSize: 12.5, fill: "var(--ink-soft)" }} axisLine={false} tickLine={false} width={30} />
             <Tooltip contentStyle={{ fontSize: 13.5, borderRadius: 12, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--ink)" }} formatter={(v) => [v, t("hi.score")]} />
-            <Bar dataKey="value" fill="#2563EB" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+              {data.map((d) => <Cell key={d.name} fill={SEV_COLOR[severity(d.value)]} />)}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
