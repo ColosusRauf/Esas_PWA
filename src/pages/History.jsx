@@ -70,19 +70,21 @@ export default function History({ patientId, assessments, onNavigate, onLogout }
           ) : (
             <>
               <div className="hist-bar">
-                <div className="chips">
+                <div className="chips presets">
                   {PRESETS.map(([v, k]) => (
                     <button key={v} className={"chip" + (preset === v && !from && !to ? " on" : "")} onClick={() => choosePreset(v)}>{t(k)}</button>
                   ))}
-                  <button className={"chip" + (cmp ? " on" : "")} onClick={toggleCompare} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    {cmp ? <X size={14} /> : <GitCompareArrows size={14} />}{cmp ? t("hi.compare.exit") : t("hi.compare")}
-                  </button>
                 </div>
                 <div className="dates">
                   <label>{t("hi.from")} <input type="date" value={from} max={to || undefined} onChange={dateChange(setFrom)} /></label>
                   <label>{t("hi.to")} <input type="date" value={to} min={from || undefined} onChange={dateChange(setTo)} /></label>
+                </div>
+                <div className="hist-meta">
+                  <span>{t("hi.count", { n: filtered.length })}</span>
                   {filtering && <button className="chip" onClick={resetFilter}>{t("hi.reset")}</button>}
-                  <span style={{ marginLeft: "auto" }}>{t("hi.count", { n: filtered.length })}</span>
+                  <button className={"chip" + (cmp ? " on" : "")} onClick={toggleCompare} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    {cmp ? <X size={14} /> : <GitCompareArrows size={14} />}{cmp ? t("hi.compare.exit") : t("hi.compare")}
+                  </button>
                 </div>
                 {cmp && <div style={{ fontSize: 13, color: "var(--primary)", fontWeight: 600 }}>{picks.length === 1 ? t("hi.compare.pickOne") : t("hi.compare.pick")}</div>}
               </div>
