@@ -2,7 +2,7 @@ import React from "react";
 
 export function Card({ title, action, children, style, bodyStyle }) {
   return (
-    <div style={{
+    <div className="card-hover" style={{
       background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20,
       padding: "clamp(16px, 2.6vh, 26px) clamp(18px, 1.6vw, 28px)", boxShadow: "0 1px 2px rgba(15,27,61,0.03)",
       display: "flex", flexDirection: "column", minHeight: 0, ...style,

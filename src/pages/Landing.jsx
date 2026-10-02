@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { User, ShieldCheck, CalendarClock, FlaskConical, HeartPulse, ClipboardList, LineChart, Smartphone, LogIn, Mail, Phone } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { User, ShieldCheck, CalendarClock, FlaskConical, HeartPulse, ClipboardList, LineChart, Smartphone, LogIn, Mail, Phone, ArrowUp } from "lucide-react";
 
 // Isi data kontak di sini. Bagian yang dikosongkan ("") tidak akan ditampilkan.
 const CONTACT = {
@@ -37,6 +37,9 @@ function goTo(id) {
 
 export default function Landing({ onGetStarted, onLogin }) {
   const [active, setActive] = useState("home");
+  const [anim, setAnim] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const rootRef = useRef(null);
 
   useEffect(() => {
     function onScroll() {
@@ -48,6 +51,14 @@ export default function Landing({ onGetStarted, onLogin }) {
       }
       if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = NAV[NAV.length - 1].id;
       setActive(cur);
+      const y = window.scrollY;
+      setScrolled(y > 12);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const root = rootRef.current;
+      if (root) {
+        root.style.setProperty("--progress", max > 0 ? String(y / max) : "0");
+        root.style.setProperty("--py", String(Math.min(y, 700) * 0.12) + "px");
+      }
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -58,9 +69,36 @@ export default function Landing({ onGetStarted, onLogin }) {
     };
   }, []);
 
+  // Efek muncul saat di-scroll (dimatikan bila pengguna memilih "kurangi gerakan")
+  useEffect(() => {
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !("IntersectionObserver" in window)) return;
+    setAnim(true);
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); setTimeout(() => e.target.classList.add("done"), 1500); io.unobserve(e.target); } }),
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
+    );
+    const t = setTimeout(() => document.querySelectorAll(".landing .reveal").forEach((el) => io.observe(el)), 30);
+    return () => { clearTimeout(t); io.disconnect(); };
+  }, []);
+
+  // Efek riak saat tombol ditekan
+  function ripple(e) {
+    const btn = e.target.closest?.(".l-btn");
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const d = Math.max(r.width, r.height) * 1.6;
+    const s = document.createElement("span");
+    s.className = "l-ripple";
+    s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+    btn.appendChild(s);
+    setTimeout(() => s.remove(), 650);
+  }
+
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)" }} className="landing">
+    <div ref={rootRef} onPointerDown={ripple} style={{ minHeight: "100vh", background: "var(--bg)" }} className={"landing" + (anim ? " anim" : "") + (scrolled ? " scrolled" : "")}>
       <header className="l-header">
+        <span className="l-progress" aria-hidden="true" />
         <button onClick={() => goTo("home")} className="l-brand" aria-label="ESAS — ke atas">
           <span className="l-logo"><HeartPulse size={17} color="#fff" /></span>
           <span style={{ fontWeight: 700, fontSize: 18, color: "var(--ink)" }}>ESAS</span>
@@ -77,7 +115,7 @@ export default function Landing({ onGetStarted, onLogin }) {
       </header>
 
       <section id="home" className="l-section l-hero">
-        <div className="l-col">
+        <div className="l-col l-hero-text">
           <h1 className="l-h1">Better Symptom Monitoring for Better Care</h1>
           <p className="l-lead">
             Aplikasi ESAS untuk membantu pasien pasca kemoterapi memantau gejala dan kualitas
@@ -88,17 +126,17 @@ export default function Landing({ onGetStarted, onLogin }) {
             <button onClick={() => goTo("about")} className="l-btn l-btn-ghost">Learn More</button>
           </div>
         </div>
-        <div className="l-col l-img">
-          <img src="/img/hero.svg" alt="Ilustrasi konsultasi dokter secara daring" width="500" height="500" />
+        <div className="l-col l-img l-hero-img">
+          <img className="l-float" src="/img/hero.svg" alt="Ilustrasi konsultasi dokter secara daring" width="500" height="500" />
         </div>
       </section>
 
       <section id="about" className="l-section l-alt">
         <div className="l-row l-inner">
-          <div className="l-col l-img">
+          <div className="l-col l-img reveal from-left">
             <img src="/img/about.svg" alt="Tim tenaga medis" width="500" height="500" loading="lazy" />
           </div>
-          <div className="l-col">
+          <div className="l-col reveal from-right">
             <span className="l-eyebrow">About</span>
             <h2 className="l-h2">Tentang ESAS</h2>
             <p className="l-lead">
@@ -108,8 +146,8 @@ export default function Landing({ onGetStarted, onLogin }) {
               dapat melihat perubahan gejala sejak dini.
             </p>
             <ul className="l-points">
-              {ABOUT_POINTS.map((p) => (
-                <li key={p.text}>
+              {ABOUT_POINTS.map((p, i) => (
+                <li key={p.text} className="reveal from-right" style={{ "--d": `${0.15 + i * 0.12}s` }}>
                   <span className="l-ico"><p.icon size={18} color="var(--primary)" /></span>
                   {p.text}
                 </li>
@@ -122,11 +160,11 @@ export default function Landing({ onGetStarted, onLogin }) {
       <section id="features" className="l-section">
         <div className="l-row l-inner">
           <div className="l-col">
-            <span className="l-eyebrow">Features</span>
-            <h2 className="l-h2">Fitur yang membantu pemantauan</h2>
+            <span className="l-eyebrow reveal">Features</span>
+            <h2 className="l-h2 reveal" style={{ "--d": "0.08s" }}>Fitur yang membantu pemantauan</h2>
             <div className="l-feat-grid">
-              {FEATURES.map((f) => (
-                <div key={f.title} className="l-feat">
+              {FEATURES.map((f, i) => (
+                <div key={f.title} className="l-feat reveal" style={{ "--d": `${0.12 + i * 0.1}s` }}>
                   <span className="l-ico"><f.icon size={19} color="var(--primary)" /></span>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 15, color: "var(--ink)", marginBottom: 3 }}>{f.title}</div>
@@ -136,7 +174,7 @@ export default function Landing({ onGetStarted, onLogin }) {
               ))}
             </div>
           </div>
-          <div className="l-col l-img">
+          <div className="l-col l-img reveal from-right">
             <img src="/img/features.svg" alt="Pemeriksaan gejala pasien" width="500" height="500" loading="lazy" />
           </div>
         </div>
@@ -144,10 +182,10 @@ export default function Landing({ onGetStarted, onLogin }) {
 
       <section id="contact" className="l-section l-alt">
         <div className="l-row l-inner">
-          <div className="l-col l-img">
+          <div className="l-col l-img reveal from-left">
             <img src="/img/contact.svg" alt="Dokter siap membantu" width="500" height="500" loading="lazy" />
           </div>
-          <div className="l-col">
+          <div className="l-col reveal from-right">
             <span className="l-eyebrow">Contact</span>
             <h2 className="l-h2">Hubungi Kami</h2>
             <p className="l-lead">{CONTACT.note}</p>
@@ -169,6 +207,10 @@ export default function Landing({ onGetStarted, onLogin }) {
           </div>
         </div>
       </section>
+
+      <button onClick={() => goTo("home")} className={"l-top" + (scrolled ? " show" : "")} aria-label="Kembali ke atas">
+        <ArrowUp size={20} />
+      </button>
 
       <footer className="l-footer">© {new Date().getFullYear()} ESAS · Pemantauan gejala pasca kemoterapi</footer>
     </div>
