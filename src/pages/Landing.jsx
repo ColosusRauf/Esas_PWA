@@ -53,10 +53,8 @@ export default function Landing({ onGetStarted, onLogin }) {
       setActive(cur);
       const y = window.scrollY;
       setScrolled(y > 12);
-      const max = document.documentElement.scrollHeight - window.innerHeight;
       const root = rootRef.current;
       if (root) {
-        root.style.setProperty("--progress", max > 0 ? String(y / max) : "0");
         root.style.setProperty("--py", String(Math.min(y, 700) * 0.12) + "px");
       }
     }

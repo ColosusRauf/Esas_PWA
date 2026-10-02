@@ -46,7 +46,7 @@ export default function Analytics({ assessments }) {
         }
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16, marginBottom: 18 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16 }}>
         <StatCard icon={ArrowUpToLine} label="Skor tertinggi" value={s.hi ? s.hi.total : "–"} sub={s.hi ? `${fmtDate(s.hi.createdAt)} (${s.hi.patientId})` : undefined} />
         <StatCard icon={ArrowDownToLine} label="Skor terendah" value={s.lo ? s.lo.total : "–"} sub={s.lo ? `${fmtDate(s.lo.createdAt)} (${s.lo.patientId})` : undefined} />
         <StatCard icon={Gauge} label="Rata-rata skor" value={s.n ? s.mean : "–"}
@@ -55,12 +55,9 @@ export default function Analytics({ assessments }) {
         <StatCard icon={Sigma} label="Standar deviasi" value={s.n ? s.sd : "–"} sub="sampel (n−1)" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 18, marginBottom: 18 }}>
+      <div className="fit-rows">
         <Card title={`Tren total skor ESAS (${days <= 31 ? "per hari" : "per minggu"})`}><TrendChart data={s.trend} /></Card>
         <Card title="Rata-rata skor per gejala"><SymptomBars rows={s.sym} /></Card>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 18 }}>
         <Card title="Distribusi total skor ESAS"><Distribution bins={s.dist} /></Card>
         <ExportPanel assessments={assessments} />
       </div>
@@ -92,14 +89,14 @@ function ExportPanel({ assessments }) {
 
   return (
     <Card title="Ekspor data penelitian">
-      <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 12px" }}>
+      <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 10px" }}>
         Berkas CSV hanya memuat Patient ID, tanpa nama atau tanggal lahir.
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8, marginBottom: 12 }}>
         {opt("full", "Data ESAS lengkap", "Satu baris per assessment, 10 gejala dan total skor.")}
         {opt("summary", "Data ringkasan", "Satu baris per pasien: jumlah, rata-rata, min, maks, SD.")}
       </div>
-      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 130 }}>
           <label htmlFor="ex-from" style={{ fontSize: 12.5, color: "var(--ink-soft)", display: "block", marginBottom: 5 }}>Dari</label>
           <input id="ex-from" type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} style={inputStyle} />

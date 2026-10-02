@@ -9,10 +9,10 @@ export const RAMP = ["#BFD4FB", "#7FA8F5", "#3F7BEE", "#1E3FA8"];
 const tip = { fontSize: 12, borderRadius: 10, border: "1px solid var(--border)" };
 const axis = { fontSize: 10.5, fill: "var(--ink-soft)" };
 
-export function TrendChart({ data, yMax = 100, height = 220, unit = "Rata-rata skor" }) {
+export function TrendChart({ data, yMax = 100, unit = "Rata-rata skor" }) {
   if (!data.length) return <Empty>Belum ada data pada periode ini.</Empty>;
   return (
-    <div style={{ height }} role="img" aria-label={`Grafik tren ${unit.toLowerCase()}`}>
+    <div className="chart-box" role="img" aria-label={`Grafik tren ${unit.toLowerCase()}`}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--border)" vertical={false} />
@@ -30,11 +30,11 @@ export function Distribution({ bins }) {
   const total = bins.reduce((s, b) => s + b.count, 0);
   if (!total) return <Empty>Belum ada data pada periode ini.</Empty>;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
-      <div style={{ width: 150, height: 150, position: "relative", flexShrink: 0 }} role="img" aria-label="Distribusi total skor">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 22, flexWrap: "wrap", flex: 1 }}>
+      <div style={{ width: "clamp(110px, 19vh, 170px)", height: "clamp(110px, 19vh, 170px)", position: "relative", flexShrink: 0 }} role="img" aria-label="Distribusi total skor">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={bins} dataKey="count" nameKey="label" innerRadius={48} outerRadius={70} paddingAngle={2} isAnimationActive={false} stroke="var(--surface)" strokeWidth={2}>
+            <Pie data={bins} dataKey="count" nameKey="label" innerRadius="68%" outerRadius="98%" paddingAngle={2} isAnimationActive={false} stroke="var(--surface)" strokeWidth={2}>
               {bins.map((b, i) => <Cell key={b.label} fill={RAMP[i]} />)}
             </Pie>
             <Tooltip contentStyle={tip} formatter={(v, n) => [`${v} assessment`, `Skor ${n}`]} />
@@ -62,7 +62,7 @@ export function Distribution({ bins }) {
 export function SymptomBars({ rows }) {
   if (!rows.some((r) => r.mean > 0)) return <Empty>Belum ada data pada periode ini.</Empty>;
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "clamp(3px, 0.9vh, 10px)", flex: 1 }}>
       {rows.map((r) => (
         <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}>
           <span style={{ width: 150, color: "var(--ink)", flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={r.label}>{r.label}</span>

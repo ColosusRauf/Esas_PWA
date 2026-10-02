@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { Card, StatCard, Empty, th, td, ghostBtn, primaryBtn, inputStyle, PageTitle } from "./ui.jsx";
 import { Modal, randomPassword, fieldLabel } from "./Modal.jsx";
 import * as api from "../api.js";
@@ -20,10 +19,8 @@ export default function PatientDetail({ id, byId, assessments, onBack, isAdmin, 
 
   return (
     <>
-      <button onClick={onBack} style={{ ...ghostBtn, display: "inline-flex", alignItems: "center", gap: 7, marginBottom: 14 }}>
-        <ArrowLeft size={15} /> Daftar pasien
-      </button>
       <PageTitle
+        onBack={onBack}
         title={p.name ? `${p.id} · ${p.name}` : p.id}
         right={isAdmin && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -37,18 +34,16 @@ export default function PatientDetail({ id, byId, assessments, onBack, isAdmin, 
         sub={[p.sex === "L" ? "Laki-laki" : p.sex === "P" ? "Perempuan" : null, ageOf(p.birthDate) != null ? `${ageOf(p.birthDate)} tahun` : null, p.active === false ? "Nonaktif" : "Aktif"].filter(Boolean).join(" · ")}
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16, marginBottom: 18 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16 }}>
         <StatCard icon={ClipboardCheck} label="Jumlah assessment" value={list.length} />
         <StatCard icon={Activity} label="Skor terakhir" value={last ? last.total : "–"} sub={last ? fmtDate(last.createdAt) : undefined} />
         <StatCard icon={TrendingUp} label="Rata-rata skor" value={list.length ? r1(mean(list.map((a) => a.total))) : "–"} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 18, marginBottom: 18 }}>
-        <Card title="Tren total skor"><TrendChart data={trendData} unit="Total skor" /></Card>
-
+      <div className="fit-rows pd-grid">
         <Card title="Skor per gejala">
           {recent.length === 0 ? <Empty>Pasien ini belum mengisi assessment.</Empty> : (
-            <div className="table-wrap">
+            <div className="table-wrap scroll-y">
               <table style={{ width: "100%", minWidth: 0, borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
@@ -81,29 +76,29 @@ export default function PatientDetail({ id, byId, assessments, onBack, isAdmin, 
             Warna angka: hijau 0–3 (ringan), kuning 4–6 (sedang), merah 7–10 (berat).
           </p>
         </Card>
+        <Card title="Tren total skor"><TrendChart data={trendData} unit="Total skor" /></Card>
+        <Card title="Riwayat assessment">
+          {list.length === 0 ? <Empty>Belum ada riwayat.</Empty> : (
+            <div className="table-wrap scroll-y">
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead><tr><th style={th}>Tanggal</th><th style={th}>Total skor</th><th style={th}>Gejala berat (&gt; 6)</th></tr></thead>
+                <tbody>
+                  {[...list].reverse().map((a) => {
+                    const sev = DOMAINS.map((d, i) => ({ l: d.label.split(" (")[0], v: a.answers[i] })).filter((s) => s.v > 6);
+                    return (
+                      <tr key={a.clientId}>
+                        <td style={td}>{fmtDate(a.createdAt)}</td>
+                        <td style={{ ...td, fontWeight: 600 }}>{a.total}</td>
+                        <td style={{ ...td, color: sev.length ? "var(--severe)" : "var(--ink-soft)" }}>{sev.length ? sev.map((s) => `${s.l} ${s.v}`).join(", ") : "Tidak ada"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
       </div>
-
-      <Card title="Riwayat assessment">
-        {list.length === 0 ? <Empty>Belum ada riwayat.</Empty> : (
-          <div className="table-wrap">
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><th style={th}>Tanggal</th><th style={th}>Total skor</th><th style={th}>Gejala berat (&gt; 6)</th></tr></thead>
-              <tbody>
-                {[...list].reverse().map((a) => {
-                  const sev = DOMAINS.map((d, i) => ({ l: d.label.split(" (")[0], v: a.answers[i] })).filter((s) => s.v > 6);
-                  return (
-                    <tr key={a.clientId}>
-                      <td style={td}>{fmtDate(a.createdAt)}</td>
-                      <td style={{ ...td, fontWeight: 600 }}>{a.total}</td>
-                      <td style={{ ...td, color: sev.length ? "var(--severe)" : "var(--ink-soft)" }}>{sev.length ? sev.map((s) => `${s.l} ${s.v}`).join(", ") : "Tidak ada"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
 
       {dialog === "edit" && <EditDialog p={p} onClose={() => setDialog(null)} onChanged={onChanged} />}
       {dialog === "reset" && <ResetDialog p={p} onClose={() => setDialog(null)} />}

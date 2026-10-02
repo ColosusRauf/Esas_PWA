@@ -43,8 +43,8 @@ export default function Logs({ onUnauthorized }) {
   return (
     <>
       <PageTitle title="Log aktivitas" sub="500 aktivitas terbaru. Password tidak pernah dicatat." />
-      <Card>
-        <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+      <Card fill>
+        <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", flexShrink: 0 }}>
           <div style={{ position: "relative", flex: 1, minWidth: 200, maxWidth: 340 }}>
             <Search size={15} color="var(--ink-soft)" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari pelaku, sasaran, atau detail" aria-label="Cari log" style={{ ...inputStyle, paddingLeft: 34 }} />
@@ -55,7 +55,7 @@ export default function Logs({ onUnauthorized }) {
           </select>
         </div>
         {st.loading ? <Empty>Memuat log…</Empty> : st.error ? <Empty>{st.error}</Empty> : rows.length === 0 ? <Empty>Tidak ada aktivitas yang cocok.</Empty> : (
-          <div className="table-wrap">
+          <div className="table-wrap scroll-y">
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 640 }}>
               <thead><tr><th style={th}>Waktu (WIB)</th><th style={th}>Pelaku</th><th style={th}>Aktivitas</th><th style={th}>Sasaran</th><th style={th}>Detail</th></tr></thead>
               <tbody>

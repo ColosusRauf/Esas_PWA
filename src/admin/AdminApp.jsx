@@ -33,10 +33,10 @@ export default function AdminApp({ session, onLogout }) {
   const data = { patients: state.patients, assessments: state.assessments, byId };
 
   return (
-    <div style={{ display: "flex", background: "var(--bg)", minHeight: "100vh" }}>
-      <AdminSidebar active={view} onNavigate={(v) => go(v)} session={session} onLogout={onLogout} />
-      <main className="page">
-        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 12, marginBottom: 6 }}>
+    <div className="shell" style={{ display: "flex", background: "var(--bg)", minHeight: "100vh" }}>
+      <AdminSidebar active={view} onNavigate={(v) => go(v)} session={session} onLogout={onLogout} onRefresh={load} loading={state.loading} />
+      <main className="page page-fit">
+        <div className="only-mobile" style={{ justifyContent: "flex-end", alignItems: "center", gap: 12, marginBottom: 6 }}>
           {state.loading && <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>Memuat data…</span>}
           <button onClick={load} disabled={state.loading} style={{ ...ghostBtn, display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 12px" }}>
             <RefreshCw size={14} /> Muat ulang
@@ -48,6 +48,7 @@ export default function AdminApp({ session, onLogout }) {
           </div>
         )}
 
+        <div className="fit-body">
         {view === "dashboard" && <Dashboard {...data} onOpenPatient={(id) => go("patients", id)} onNavigate={go} />}
         {view === "patients" && !patientId && (
           <Patients {...data} isAdmin={isAdmin} onOpen={(id) => go("patients", id)} onCreated={load} />
@@ -55,6 +56,7 @@ export default function AdminApp({ session, onLogout }) {
         {view === "patients" && patientId && <PatientDetail {...data} id={patientId} isAdmin={isAdmin} onChanged={load} onBack={() => go("patients")} />}
         {view === "analytics" && <Analytics {...data} />}
         {view === "logs" && isAdmin && <Logs onUnauthorized={onLogout} />}
+        </div>
       </main>
     </div>
   );

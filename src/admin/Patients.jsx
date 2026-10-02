@@ -32,8 +32,8 @@ export default function Patients({ patients, assessments, isAdmin, onOpen, onCre
         )}
       />
 
-      <Card>
-        <div style={{ position: "relative", marginBottom: 14, maxWidth: 380 }}>
+      <Card fill>
+        <div style={{ position: "relative", marginBottom: 12, maxWidth: 380, flexShrink: 0 }}>
           <Search size={15} color="var(--ink-soft)" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={isAdmin ? "Cari ID atau nama" : "Cari Patient ID"} aria-label="Cari pasien" style={{ ...inputStyle, paddingLeft: 34 }} />
         </div>
@@ -41,7 +41,7 @@ export default function Patients({ patients, assessments, isAdmin, onOpen, onCre
         {rows.length === 0 ? (
           <Empty>{patients.length === 0 ? "Belum ada pasien terdaftar." : "Tidak ada pasien yang cocok."}</Empty>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap scroll-y">
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>

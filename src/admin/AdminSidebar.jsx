@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutDashboard, Users, BarChart3, ScrollText, LogOut, HeartPulse } from "lucide-react";
+import { LayoutDashboard, Users, BarChart3, ScrollText, LogOut, HeartPulse, RefreshCw } from "lucide-react";
 
 const ITEMS = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -9,17 +9,17 @@ const ITEMS = [
 ];
 const ROLE = { admin: "Admin", researcher: "Peneliti" };
 
-export default function AdminSidebar({ active, onNavigate, session, onLogout }) {
+export default function AdminSidebar({ active, onNavigate, session, onLogout, onRefresh, loading }) {
   const base = {
-    display: "flex", alignItems: "center", gap: 13, padding: "13px 16px", borderRadius: 10, border: "none",
-    cursor: "pointer", textAlign: "left", fontSize: 15.5, background: "transparent",
+    display: "flex", alignItems: "center", gap: 13, padding: "12px 16px", borderRadius: 10, border: "none",
+    cursor: "pointer", textAlign: "left", fontSize: 15, whiteSpace: "nowrap", background: "transparent",
   };
   return (
     <aside className="sidebar" style={{
-      width: 264, flexShrink: 0, background: "var(--surface)", borderRight: "1px solid var(--border)",
-      display: "flex", flexDirection: "column", padding: "28px 18px", minHeight: "100vh",
+      width: 248, flexShrink: 0, background: "var(--surface)", borderRight: "1px solid var(--border)",
+      display: "flex", flexDirection: "column", padding: "22px 16px", minHeight: "100vh",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "0 10px", marginBottom: 38 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "0 10px", marginBottom: 26 }}>
         <div style={{ width: 40, height: 40, borderRadius: 11, background: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <HeartPulse size={22} color="#fff" />
         </div>
@@ -51,6 +51,10 @@ export default function AdminSidebar({ active, onNavigate, session, onLogout }) 
           <strong style={{ color: "var(--ink)" }}>{session.name || session.id}</strong>
           <div>{ROLE[session.role] || session.role}</div>
         </div>
+        <button onClick={onRefresh} disabled={loading} style={{ ...base, width: "100%", color: "var(--ink-soft)", fontWeight: 500, opacity: loading ? 0.6 : 1 }}>
+          <RefreshCw size={20} className={loading ? "spin" : undefined} />
+          {loading ? "Memuat…" : "Muat ulang"}
+        </button>
         <button onClick={onLogout} style={{ ...base, width: "100%", color: "var(--severe)", fontWeight: 500 }}>
           <LogOut size={20} />
           Keluar

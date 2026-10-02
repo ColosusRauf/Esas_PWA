@@ -141,10 +141,9 @@ html { scroll-behavior: smooth; }
 /* ===== Efek gerak ===== */
 :root { --ease: cubic-bezier(.22,.8,.26,1); }
 
-/* Header: bayangan + bar progres scroll */
+/* Header: bayangan saat di-scroll */
 .l-header { transition: box-shadow .25s var(--ease), padding .25s var(--ease), background .25s; }
 .landing.scrolled .l-header { box-shadow: 0 8px 24px -16px rgba(15,27,61,.28); padding-top: 9px; padding-bottom: 9px; }
-.l-progress { position: absolute; left: 0; bottom: -1px; height: 3px; width: 100%; background: var(--primary); transform-origin: left; transform: scaleX(var(--progress, 0)); border-radius: 0 3px 3px 0; }
 
 /* Tombol: angkat saat hover, menekan saat ditekan, riak */
 .l-btn, .l-link, .l-top, .l-brand { position: relative; overflow: hidden; transition: transform .18s var(--ease), box-shadow .2s var(--ease), background .2s, filter .2s, color .2s; -webkit-tap-highlight-color: transparent; }
@@ -218,3 +217,24 @@ button[role="radio"][aria-checked="true"] { animation: l-popsel .28s var(--ease)
 
 .landing.anim .reveal.in.done { transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s; }
 .landing.anim .l-points li.reveal.in.done:hover { transform: translateX(6px); }
+
+/* ===== Admin: muat satu layar ===== */
+.fit-body { display: flex; flex-direction: column; gap: 18px; }
+.fit-rows { display: grid; gap: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pd-grid > :first-child { grid-row: span 2; }
+.table-wrap.scroll-y { flex: 1; min-height: 0; }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 960px) {
+  .fit-rows { grid-template-columns: minmax(0, 1fr); }
+  .pd-grid { grid-template-columns: minmax(0, 1fr); }
+  .pd-grid > :first-child { grid-row: auto; }
+}
+@media (min-width: 821px) and (min-height: 560px) {
+  .fit-body > * { flex-shrink: 0; }
+  .fit-body > .fill, .fit-body > .fit-rows { flex: 1 1 0; min-height: 0; flex-shrink: 1; }
+  .fit-rows { grid-auto-rows: minmax(0, 1fr); }
+  .table-wrap.scroll-y { overflow: auto; }
+  .table-wrap { min-height: 0; }
+}

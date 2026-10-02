@@ -36,7 +36,7 @@ export default function Dashboard({ patients, assessments, byId, onOpenPatient, 
     <>
       <PageTitle title="Dashboard" sub="Ringkasan pasien dan hasil assessment ESAS." />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16, marginBottom: 18 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16 }}>
         <StatCard icon={Users} label="Pasien aktif" value={m.active} />
         <StatCard icon={ClipboardCheck} label="Assessment hari ini" value={m.todayCount} />
         <StatCard
@@ -47,12 +47,9 @@ export default function Dashboard({ patients, assessments, byId, onOpenPatient, 
         <StatCard icon={AlertTriangle} label="Perlu perhatian" value={m.attention.length} sub="gejala > 6, 14 hari terakhir" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 18, marginBottom: 18 }}>
+      <div className="fit-rows">
         <Card title="Tren rata-rata skor (7 hari)"><TrendChart data={m.trend7} /></Card>
         <Card title="Distribusi total skor (30 hari)"><Distribution bins={m.dist} /></Card>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(330px, 1fr))", gap: 18 }}>
         <Card title="Perlu perhatian">
           {m.attention.length === 0 ? (
             <Empty>Tidak ada pasien dengan gejala berat pada assessment terakhirnya.</Empty>
