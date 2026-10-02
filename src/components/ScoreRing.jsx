@@ -1,6 +1,9 @@
 import React from "react";
+import { useLang } from "../i18n.jsx";
 
-export default function ScoreRing({ value, max = 100, size = 96, label = "Total Skor" }) {
+export default function ScoreRing({ value, max = 100, size = 96, label }) {
+  const { t } = useLang();
+  label = label ?? t("common.total");
   const pct = Math.min(100, (value / max) * 100);
   const color = pct <= 30 ? "var(--mild)" : pct <= 60 ? "var(--moderate)" : "var(--severe)";
 

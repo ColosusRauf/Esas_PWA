@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout.jsx";
 import { Card, primaryBtn, ghostBtn } from "../components/ui.jsx";
-import { DOMAINS } from "../data.js";
+import { DOMAINS, dFull, dLo, dHi } from "../data.js";
+import { useLang } from "../i18n.jsx";
 
 const PER_PAGE = 4;
 const PAGES = Math.ceil(DOMAINS.length / PER_PAGE);
 
 export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }) {
+  const { t, lang } = useLang();
   const [page, setPage] = useState(0);
   const [answers, setAnswers] = useState(Array(DOMAINS.length).fill(null));
 
@@ -30,11 +32,11 @@ export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }
 
   return (
     <Layout active="assessment" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
-      title="ESAS Assessment" subtitle="Pilih angka yang sesuai dengan kondisi Anda hari ini. 0 = Tidak ada, 10 = Sangat berat.">
+      title={t("as.title")} subtitle={t("as.sub")}>
       <Card style={{ flex: 1 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <span style={{ fontSize: 15, color: "var(--ink-soft)", fontWeight: 600 }}>Halaman {page + 1} dari {PAGES}</span>
-          <span style={{ fontSize: 15, color: "var(--ink-soft)", fontWeight: 600 }}>{answeredCount} / {DOMAINS.length} terjawab</span>
+          <span style={{ fontSize: 15, color: "var(--ink-soft)", fontWeight: 600 }}>{t("as.page", { a: page + 1, b: PAGES })}</span>
+          <span style={{ fontSize: 15, color: "var(--ink-soft)", fontWeight: 600 }}>{t("as.answered", { n: answeredCount, m: DOMAINS.length })}</span>
         </div>
         <div style={{ height: 8, borderRadius: 6, background: "var(--primary-soft)", marginBottom: "clamp(12px, 3vh, 28px)", flexShrink: 0 }}>
           <div style={{ width: pct + "%", height: "100%", borderRadius: 6, background: "var(--primary)", transition: "width .2s" }} />
@@ -51,10 +53,10 @@ export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }
                   <div style={{ width: 42, height: 42, borderRadius: 12, background: "var(--primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <Icon size={21} color="var(--primary)" />
                   </div>
-                  <span style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)" }}>{idx + 1}. {d.label}</span>
+                  <span style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)" }}>{idx + 1}. {dFull(d, lang)}</span>
                 </div>
                 <div style={{ width: "fit-content", maxWidth: "100%" }}>
-                <div role="radiogroup" aria-label={d.label} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div role="radiogroup" aria-label={dFull(d, lang)} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {Array.from({ length: 11 }, (_, n) => n).map((n) => {
                     const selected = v === n;
                     return (
@@ -68,8 +70,8 @@ export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }
                   })}
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13.5, color: "var(--ink-soft)", marginTop: 10 }}>
-                  <span>{d.lo}</span>
-                  <span>{d.hi}</span>
+                  <span>{dLo(d, lang)}</span>
+                  <span>{dHi(d, lang)}</span>
                 </div>
                 </div>
               </div>
@@ -81,11 +83,11 @@ export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }
           <button onClick={() => setPage(Math.max(0, page - 1))} disabled={page === 0} style={{
             ...ghostBtn, flex: 1, padding: "13px 18px", fontSize: 16, flexShrink: 0,
             cursor: page === 0 ? "not-allowed" : "pointer", opacity: page === 0 ? 0.5 : 1,
-          }}>Sebelumnya</button>
+          }}>{t("as.prev")}</button>
           <button onClick={handleNext} disabled={!pageComplete} style={{
             ...primaryBtn, flex: 1, padding: "15px 18px", fontSize: 16,
             cursor: pageComplete ? "pointer" : "not-allowed", opacity: pageComplete ? 1 : 0.45,
-          }}>{isLastPage ? "Selesai & Kirim" : "Berikutnya"}</button>
+          }}>{isLastPage ? t("as.submit") : t("as.next")}</button>
         </div>
       </Card>
     </Layout>

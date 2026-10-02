@@ -1,4 +1,5 @@
 import React from "react";
+import { ThemeSegment } from "../components/Toggles.jsx";
 import { LayoutDashboard, Users, BarChart3, ScrollText, LogOut, HeartPulse, RefreshCw } from "lucide-react";
 
 const ITEMS = [
@@ -51,6 +52,7 @@ export default function AdminSidebar({ active, onNavigate, session, onLogout, on
           <strong style={{ color: "var(--ink)" }}>{session.name || session.id}</strong>
           <div>{ROLE[session.role] || session.role}</div>
         </div>
+        <div style={{ padding: "0 4px 10px" }}><ThemeSegment compact showLabels={false} /></div>
         <button onClick={onRefresh} disabled={loading} style={{ ...base, width: "100%", color: "var(--ink-soft)", fontWeight: 500, opacity: loading ? 0.6 : 1 }}>
           <RefreshCw size={20} className={loading ? "spin" : undefined} />
           {loading ? "Memuat…" : "Muat ulang"}

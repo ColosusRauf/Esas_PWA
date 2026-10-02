@@ -35,5 +35,5 @@ revoke all on function public.esas_create_patient(text, text, text, date, text) 
 --   admin      : melihat nama pasien + boleh menambah pasien
 --   researcher : hanya melihat Patient ID (tanpa nama/tanggal lahir) + analitik + ekspor
 insert into public.staff (username, password_hash, display_name, role)
-values ('admin', extensions.crypt('admin', extensions.gen_salt('bf')), 'Admin ESAS', 'admin')
+values ('admin', extensions.crypt('ganti-password-admin', extensions.gen_salt('bf')), 'Admin ESAS', 'admin')
 on conflict (username) do nothing;

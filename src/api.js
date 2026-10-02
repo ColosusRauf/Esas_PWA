@@ -7,18 +7,32 @@ export const setToken = (t) => {
   try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch {}
 };
 
-async function call(path, { method = "GET", body } = {}) {
-  const token = getToken();
-  const res = await fetch(path, {
-    method,
-    headers: {
-      "content-type": "application/json",
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+// Kode error yang dilempar:
+//   NETWORK       -> tidak ada koneksi / server tak terjangkau
+//   UNAUTHORIZED  -> 401 (token kedaluwarsa atau login salah)
+//   HTTP_<status> -> respons lain (error.status berisi angkanya, error.code isi "error" dari server)
+async function call(path, { method = "GET", body, token } = {}) {
+  const tk = token ?? getToken();
+  let res;
+  try {
+    res = await fetch(path, {
+      method,
+      headers: {
+        "content-type": "application/json",
+        ...(tk ? { authorization: `Bearer ${tk}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error("NETWORK");
+  }
   if (res.status === 401) throw new Error("UNAUTHORIZED");
-  if (!res.ok) throw new Error(`HTTP_${res.status}`);
+  if (!res.ok) {
+    const e = new Error(`HTTP_${res.status}`);
+    e.status = res.status;
+    try { e.code = (await res.json()).error; } catch {}
+    throw e;
+  }
   return res.json();
 }
 
@@ -30,6 +44,12 @@ export const login = (id, password, role = "patient") =>
 export const listAssessments = async () => (await call("/api/assessments")).items;
 export const createAssessment = ({ clientId, answers }) =>
   call("/api/assessments", { method: "POST", body: { clientId, answers } });
+export const getConsent = () => call("/api/consent");
+export const postConsent = (version) => call("/api/consent", { method: "POST", body: { version } });
+export const pushKey = () => call("/api/push");
+export const pushSubscribe = (subscription) => call("/api/push", { method: "POST", body: { subscription } });
+export const pushUnsubscribe = (endpoint, token) => call("/api/push", { method: "DELETE", body: { endpoint }, token });
+export const pushTest = () => call("/api/push", { method: "POST", body: { test: true } });
 
 // petugas
 export const adminPatients = async () => (await call("/api/admin/patients")).items;

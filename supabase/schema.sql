@@ -32,5 +32,5 @@ revoke all on function public.esas_login(text, text) from public, anon, authenti
 
 -- Contoh akun. GANTI password sebelum dipakai. Petugas membuat akun pasien dengan pola yang sama.
 insert into public.patients (id, password_hash)
-values ('P001', extensions.crypt('P001', extensions.gen_salt('bf')))
+values ('P001', extensions.crypt('ganti-password-ini', extensions.gen_salt('bf')))
 on conflict (id) do nothing;

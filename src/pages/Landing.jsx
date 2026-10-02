@@ -1,31 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLang } from "../i18n.jsx";
+import { LangSegment, ThemeButton } from "../components/Toggles.jsx";
+import { CONTACT } from "../contact.js";
 import { User, ShieldCheck, CalendarClock, FlaskConical, HeartPulse, ClipboardList, LineChart, Smartphone, LogIn, Mail, Phone, ArrowUp } from "lucide-react";
 
-// Isi data kontak di sini. Bagian yang dikosongkan ("") tidak akan ditampilkan.
-const CONTACT = {
-  email: "hafizavv@gmail.com",
-  phone: "+62 852 1071 3255",
-  note: "Untuk pertanyaan seputar akun atau penggunaan aplikasi, hubungi peneliti atau tenaga kesehatan yang mendampingi Anda.",
-};
-
 const NAV = [
-  { id: "home", label: "Home" },
-  { id: "about", label: "About" },
-  { id: "features", label: "Features" },
-  { id: "contact", label: "Contact" },
+  { id: "home", label: "ld.nav.home" },
+  { id: "about", label: "ld.nav.about" },
+  { id: "features", label: "ld.nav.features" },
+  { id: "contact", label: "ld.nav.contact" },
 ];
 
 const FEATURES = [
-  { icon: User, title: "Mudah Digunakan", desc: "Tampilan sederhana dan intuitif" },
-  { icon: ShieldCheck, title: "Aman & Terpercaya", desc: "Data Anda terlindungi dengan baik" },
-  { icon: CalendarClock, title: "Pantauan Berkala", desc: "Lihat perkembangan gejala dari waktu ke waktu" },
-  { icon: FlaskConical, title: "Untuk Penelitian", desc: "Mendukung analisis data untuk riset medis" },
+  { icon: User, title: "ld.feat.1t", desc: "ld.feat.1d" },
+  { icon: ShieldCheck, title: "ld.feat.2t", desc: "ld.feat.2d" },
+  { icon: CalendarClock, title: "ld.feat.3t", desc: "ld.feat.3d" },
+  { icon: FlaskConical, title: "ld.feat.4t", desc: "ld.feat.4d" },
 ];
 
 const ABOUT_POINTS = [
-  { icon: ClipboardList, text: "10 gejala dinilai dengan skala 0–10 setiap hari" },
-  { icon: LineChart, text: "Skor dan grafik perkembangan tersimpan rapi" },
-  { icon: Smartphone, text: "Bisa dipasang di HP dan tetap dapat dipakai saat sinyal lemah" },
+  { icon: ClipboardList, text: "ld.about.p1" },
+  { icon: LineChart, text: "ld.about.p2" },
+  { icon: Smartphone, text: "ld.about.p3" },
 ];
 
 function goTo(id) {
@@ -35,7 +31,8 @@ function goTo(id) {
   el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
 }
 
-export default function Landing({ onGetStarted, onLogin }) {
+export default function Landing({ onGetStarted, onLogin, onPrivacy }) {
+  const { t } = useLang();
   const [active, setActive] = useState("home");
   const [anim, setAnim] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -96,57 +93,52 @@ export default function Landing({ onGetStarted, onLogin }) {
   return (
     <div ref={rootRef} onPointerDown={ripple} style={{ minHeight: "100vh", background: "var(--bg)" }} className={"landing" + (anim ? " anim" : "") + (scrolled ? " scrolled" : "")}>
       <header className="l-header">
-        <button onClick={() => goTo("home")} className="l-brand" aria-label="ESAS — ke atas">
+        <button onClick={() => goTo("home")} className="l-brand" aria-label={t("ld.brandAria")}>
           <span className="l-logo"><HeartPulse size={17} color="#fff" /></span>
           <span style={{ fontWeight: 700, fontSize: 18, color: "var(--ink)" }}>ESAS</span>
         </button>
-        <nav className="l-nav" aria-label="Menu utama">
+        <nav className="l-nav" aria-label={t("nav.main")}>
           {NAV.map((n) => (
             <button key={n.id} onClick={() => goTo(n.id)} className={"l-link" + (active === n.id ? " on" : "")}
               aria-current={active === n.id ? "true" : undefined}>
-              {n.label}
+              {t(n.label)}
             </button>
           ))}
         </nav>
-        <button onClick={onLogin} className="l-btn l-btn-primary l-login" style={{ padding: "9px 22px", fontSize: 14 }}>Login</button>
+        <div className="l-tools"><LangSegment compact /><ThemeButton /></div>
+        <button onClick={onLogin} className="l-btn l-btn-primary l-login" style={{ padding: "9px 22px", fontSize: 14 }}>{t("ld.login")}</button>
       </header>
 
       <section id="home" className="l-section l-hero">
         <div className="l-col l-hero-text">
-          <h1 className="l-h1">Better Symptom Monitoring for Better Care</h1>
+          <h1 className="l-h1">{t("ld.h1")}</h1>
           <p className="l-lead">
-            Aplikasi ESAS untuk membantu pasien pasca kemoterapi memantau gejala dan kualitas
-            hidup secara mandiri dan mudah.
+            {t("ld.lead")}
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button onClick={onGetStarted} className="l-btn l-btn-primary">Get Started</button>
-            <button onClick={() => goTo("about")} className="l-btn l-btn-ghost">Learn More</button>
+            <button onClick={onGetStarted} className="l-btn l-btn-primary">{t("ld.start")}</button>
+            <button onClick={() => goTo("about")} className="l-btn l-btn-ghost">{t("ld.learn")}</button>
           </div>
         </div>
         <div className="l-col l-img l-hero-img">
-          <img className="l-float" src="/img/hero.svg" alt="Ilustrasi konsultasi dokter secara daring" width="500" height="500" />
+          <img className="l-float" src="/img/hero.svg" alt={t("ld.heroAlt")} width="500" height="500" />
         </div>
       </section>
 
       <section id="about" className="l-section l-alt">
         <div className="l-row l-inner">
           <div className="l-col l-img reveal from-left">
-            <img src="/img/about.svg" alt="Tim tenaga medis" width="500" height="500" loading="lazy" />
+            <img src="/img/about.svg" alt={t("ld.aboutAlt")} width="500" height="500" loading="lazy" />
           </div>
           <div className="l-col reveal from-right">
-            <span className="l-eyebrow">About</span>
-            <h2 className="l-h2">Tentang ESAS</h2>
-            <p className="l-lead">
-              ESAS (Edmonton Symptom Assessment System) adalah kuesioner singkat untuk menilai
-              keparahan gejala yang sering dialami pasien kanker, seperti nyeri, kelelahan, mual,
-              dan gangguan tidur. Dengan mengisinya secara rutin, pasien dan tenaga kesehatan
-              dapat melihat perubahan gejala sejak dini.
-            </p>
+            <span className="l-eyebrow">{t("ld.about.eyebrow")}</span>
+            <h2 className="l-h2">{t("ld.about.h2")}</h2>
+            <p className="l-lead">{t("ld.about.text")}</p>
             <ul className="l-points">
               {ABOUT_POINTS.map((p, i) => (
                 <li key={p.text} className="reveal from-right" style={{ "--d": `${0.15 + i * 0.12}s` }}>
                   <span className="l-ico"><p.icon size={18} color="var(--primary)" /></span>
-                  {p.text}
+                  {t(p.text)}
                 </li>
               ))}
             </ul>
@@ -157,22 +149,22 @@ export default function Landing({ onGetStarted, onLogin }) {
       <section id="features" className="l-section">
         <div className="l-row l-inner">
           <div className="l-col">
-            <span className="l-eyebrow reveal">Features</span>
-            <h2 className="l-h2 reveal" style={{ "--d": "0.08s" }}>Fitur yang membantu pemantauan</h2>
+            <span className="l-eyebrow reveal">{t("ld.feat.eyebrow")}</span>
+            <h2 className="l-h2 reveal" style={{ "--d": "0.08s" }}>{t("ld.feat.h2")}</h2>
             <div className="l-feat-grid">
               {FEATURES.map((f, i) => (
                 <div key={f.title} className="l-feat reveal" style={{ "--d": `${0.12 + i * 0.1}s` }}>
                   <span className="l-ico"><f.icon size={19} color="var(--primary)" /></span>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: "var(--ink)", marginBottom: 3 }}>{f.title}</div>
-                    <div style={{ fontSize: 13.5, color: "var(--ink-soft)", lineHeight: 1.5 }}>{f.desc}</div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: "var(--ink)", marginBottom: 3 }}>{t(f.title)}</div>
+                    <div style={{ fontSize: 13.5, color: "var(--ink-soft)", lineHeight: 1.5 }}>{t(f.desc)}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
           <div className="l-col l-img reveal from-right">
-            <img src="/img/features.svg" alt="Pemeriksaan gejala pasien" width="500" height="500" loading="lazy" />
+            <img src="/img/features.svg" alt={t("ld.featAlt")} width="500" height="500" loading="lazy" />
           </div>
         </div>
       </section>
@@ -180,12 +172,12 @@ export default function Landing({ onGetStarted, onLogin }) {
       <section id="contact" className="l-section l-alt">
         <div className="l-row l-inner">
           <div className="l-col l-img reveal from-left">
-            <img src="/img/contact.svg" alt="Dokter siap membantu" width="500" height="500" loading="lazy" />
+            <img src="/img/contact.svg" alt={t("ld.contactAlt")} width="500" height="500" loading="lazy" />
           </div>
           <div className="l-col reveal from-right">
-            <span className="l-eyebrow">Contact</span>
-            <h2 className="l-h2">Hubungi Kami</h2>
-            <p className="l-lead">{CONTACT.note}</p>
+            <span className="l-eyebrow">{t("ld.contact.eyebrow")}</span>
+            <h2 className="l-h2">{t("ld.contact.h2")}</h2>
+            <p className="l-lead">{t("ld.contact.note")}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
               {CONTACT.email && (
                 <a className="l-contact" href={`mailto:${CONTACT.email}`}>
@@ -199,17 +191,20 @@ export default function Landing({ onGetStarted, onLogin }) {
               )}
             </div>
             <button onClick={onLogin} className="l-btn l-btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: 9 }}>
-              <LogIn size={17} /> Masuk ke ESAS
+              <LogIn size={17} /> {t("ld.contact.cta")}
             </button>
           </div>
         </div>
       </section>
 
-      <button onClick={() => goTo("home")} className={"l-top" + (scrolled ? " show" : "")} aria-label="Kembali ke atas">
+      <button onClick={() => goTo("home")} className={"l-top" + (scrolled ? " show" : "")} aria-label={t("ld.top")}>
         <ArrowUp size={20} />
       </button>
 
-      <footer className="l-footer">© {new Date().getFullYear()} ESAS · Pemantauan gejala pasca kemoterapi</footer>
+      <footer className="l-footer">
+        © {new Date().getFullYear()} ESAS · {t("ld.footer")}
+        {onPrivacy && <> · <button onClick={onPrivacy} style={{ background: "none", border: "none", padding: 0, color: "var(--primary)", cursor: "pointer", fontSize: "inherit", textDecoration: "underline" }}>{t("ld.privacy")}</button></>}
+      </footer>
     </div>
   );
 }

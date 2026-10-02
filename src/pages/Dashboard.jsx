@@ -4,18 +4,18 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import Layout from "../components/Layout.jsx";
 import ScoreRing from "../components/ScoreRing.jsx";
 import { Card, linkBtn, th, td, primaryBtn } from "../components/ui.jsx";
-import { DOMAINS, totalOf } from "../data.js";
-
-const todayLabel = () =>
-  new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Jakarta" });
+import { DOMAINS, totalOf, dShort } from "../data.js";
+import { useLang } from "../i18n.jsx";
+import { fmtDate, fmtShort, dayKeyWIB, todayKeyWIB } from "../format.js";
 
 export default function Dashboard({ patientId, assessments, onNavigate, onLogout, onStartAssessment }) {
+  const { t, lang } = useLang();
   const latest = assessments[assessments.length - 1];
   const total = latest ? totalOf(latest.answers) : 0;
-  const doneToday = !!latest && latest.tanggal === todayLabel();
+  const doneToday = !!latest && dayKeyWIB(latest.createdAt) === todayKeyWIB();
 
   const trend = assessments.slice(-7).map((a) => ({
-    tanggal: a.tanggal.split(" ").slice(0, 2).join(" "),
+    tanggal: fmtShort(a.createdAt, lang),
     total: totalOf(a.answers),
   }));
 
@@ -27,7 +27,7 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
 
   return (
     <Layout active="dashboard" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
-      title={`Halo, Pasien ${patientId}`} subtitle="Tetap semangat! Kesehatan Anda adalah prioritas kami.">
+      title={t("dash.hello", { id: patientId })} subtitle={t("dash.sub")}>
       <div className="grid-2 fit-top">
         <Card bodyStyle={{ justifyContent: "space-between", gap: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
@@ -38,25 +38,25 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
               <Icon size={30} color="var(--primary)" />
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 20, color: "var(--ink)" }}>Assessment Hari Ini</div>
+              <div style={{ fontWeight: 700, fontSize: 20, color: "var(--ink)" }}>{t("dash.today")}</div>
               <div style={{ fontSize: 15, color: doneToday ? "var(--mild)" : "var(--ink-soft)", marginTop: 3 }}>
-                {doneToday ? "Sudah diisi hari ini" : "Belum diisi"}
+                {doneToday ? t("dash.done") : t("dash.notyet")}
               </div>
             </div>
           </div>
           <button onClick={onStartAssessment} style={{ ...primaryBtn, width: "100%", padding: "14px 20px", fontSize: 16, borderRadius: 14 }}>
-            {doneToday ? "Isi lagi" : "Mulai ESAS"}
+            {doneToday ? t("dash.again") : t("dash.start")}
           </button>
         </Card>
 
-        <Card title="Ringkasan Skor">
+        <Card title={t("dash.summary")}>
           <div style={{ display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
             <ScoreRing value={total} size={128} />
             <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 9 }}>
-              {topSymptoms.length === 0 && <span style={{ fontSize: 15, color: "var(--ink-soft)" }}>Belum ada data</span>}
+              {topSymptoms.length === 0 && <span style={{ fontSize: 15, color: "var(--ink-soft)" }}>{t("dash.nodata")}</span>}
               {topSymptoms.map((s) => (
                 <div key={s.key} style={{ display: "flex", justifyContent: "space-between", fontSize: 15.5 }}>
-                  <span style={{ color: "var(--ink-soft)" }}>{s.label.split(" (")[0]}</span>
+                  <span style={{ color: "var(--ink-soft)" }}>{dShort(s, lang)}</span>
                   <span style={{ fontWeight: 700, color: "var(--ink)" }}>{s.v}</span>
                 </div>
               ))}
@@ -66,18 +66,18 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
       </div>
 
       <div className="grid-2 fit-fill">
-        <Card title="Riwayat Assessment" action={<button onClick={() => onNavigate("history")} style={linkBtn}>Lihat Semua</button>}>
+        <Card title={t("dash.history")} action={<button onClick={() => onNavigate("history")} style={linkBtn}>{t("dash.viewall")}</button>}>
           {assessments.length === 0 ? (
-            <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>Belum ada riwayat. Mulai assessment pertama Anda.</p>
+            <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>{t("dash.emptyHistory")}</p>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><th style={th}>Tanggal</th><th style={th}>Total Skor</th><th style={th}>Status</th></tr></thead>
+              <thead><tr><th style={th}>{t("common.date")}</th><th style={th}>{t("common.total")}</th><th style={th}>{t("common.status")}</th></tr></thead>
               <tbody>
                 {[...assessments].reverse().slice(0, 5).map((a) => (
                   <tr key={a.id}>
-                    <td style={td}>{a.tanggal}</td>
+                    <td style={td}>{fmtDate(a.createdAt, lang)}</td>
                     <td style={{ ...td, fontWeight: 600 }}>{totalOf(a.answers)}</td>
-                    <td style={td}><span style={{ color: a.status === "Selesai" ? "var(--mild)" : "var(--moderate)", fontWeight: 600 }}>● {a.status}</span></td>
+                    <td style={td}><span style={{ color: a.synced ? "var(--mild)" : "var(--moderate)", fontWeight: 600 }}>● {a.synced ? t("st.done") : t("st.pending")}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -85,14 +85,14 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
           )}
         </Card>
 
-        <Card title="Grafik Skor Terakhir">
-          <div className="chart-box" role="img" aria-label="Grafik total skor assessment terakhir">
+        <Card title={t("dash.chart")}>
+          <div className="chart-box" role="img" aria-label={t("dash.chartAria")}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trend} margin={{ top: 8, right: 14, left: 0, bottom: 0 }}>
                 <CartesianGrid stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="tanggal" tick={{ fontSize: 12.5, fill: "var(--ink-soft)" }} axisLine={false} tickLine={false} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12.5, fill: "var(--ink-soft)" }} axisLine={false} tickLine={false} width={36} />
-                <Tooltip contentStyle={{ fontSize: 13.5, borderRadius: 12, border: "1px solid var(--border)" }} formatter={(v) => [v, "Total skor"]} />
+                <Tooltip contentStyle={{ fontSize: 13.5, borderRadius: 12, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--ink)" }} formatter={(v) => [v, t("dash.totalTip")]} />
                 <Line type="linear" dataKey="total" stroke="#2563EB" strokeWidth={2.5} isAnimationActive={false}
                   dot={{ r: 5, fill: "#2563EB", stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 7 }} />
               </LineChart>

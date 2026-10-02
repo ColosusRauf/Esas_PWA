@@ -43,7 +43,7 @@ export default function AdminApp({ session, onLogout }) {
           </button>
         </div>
         {state.error && (
-          <div role="alert" style={{ background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", borderRadius: 10, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>
+          <div role="alert" className="alert-err">
             {state.error}
           </div>
         )}

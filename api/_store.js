@@ -17,12 +17,14 @@ async function sb(path, init = {}) {
   const key = process.env.SUPABASE_SERVICE_KEY;
   const r = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${path}`, {
     ...init,
-         headers: {
-         apikey: key,
-         ...(String(key).startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}),
-         "content-type": "application/json",
-         ...init.headers,
-       },
+    headers: {
+      apikey: key,
+      // Kunci lama (service_role) berbentuk JWT dan perlu header Authorization.
+      // Kunci baru (sb_secret_...) bukan JWT: hanya boleh lewat header apikey.
+      ...(String(key).startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}),
+      "content-type": "application/json",
+      ...init.headers,
+    },
   });
   if (!r.ok) {
     const e = new Error(`supabase ${path} -> ${r.status}`);
@@ -188,4 +190,62 @@ export async function listLogs(limit = 500) {
     rows = rowsOf(await n8n("esas-admin-logs", { limit }));
   }
   return rows.filter((r) => r && r.id != null && r.at && r.action).slice(0, limit);
+}
+
+// ---------- persetujuan & pengingat (hanya mode Supabase) ----------
+function notSupported() {
+  const e = new Error("NOT_SUPPORTED");
+  e.status = 501;
+  throw e;
+}
+const enc = encodeURIComponent;
+
+export async function getConsent(patientId) {
+  if (!useSupabase()) notSupported();
+  const r = (await sb(`patients?id=eq.${enc(patientId)}&select=consented_at,consent_version`))?.[0];
+  return { consented: !!r?.consented_at, at: r?.consented_at || null, version: r?.consent_version || null };
+}
+
+export async function setConsent(patientId, version) {
+  if (!useSupabase()) notSupported();
+  const at = new Date().toISOString();
+  await sb(`patients?id=eq.${enc(patientId)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({ consented_at: at, consent_version: version }),
+  });
+  return at;
+}
+
+export async function savePushSub(patientId, { endpoint, keys }) {
+  if (!useSupabase()) notSupported();
+  await sb("push_subscriptions?on_conflict=endpoint", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({ endpoint, patient_id: patientId, p256dh: keys.p256dh, auth: keys.auth }),
+  });
+}
+
+export async function deletePushSub(endpoint, patientId = null) {
+  if (!useSupabase()) notSupported();
+  const who = patientId ? `&patient_id=eq.${enc(patientId)}` : "";
+  await sb(`push_subscriptions?endpoint=eq.${enc(endpoint)}${who}`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
+}
+
+export async function listPushSubs(patientId) {
+  if (!useSupabase()) notSupported();
+  return sb(`push_subscriptions?patient_id=eq.${enc(patientId)}&select=endpoint,p256dh,auth,patient_id`);
+}
+
+// Langganan milik pasien aktif yang BELUM mengisi ESAS sejak sinceIso
+export async function listDueSubs(sinceIso) {
+  if (!useSupabase()) notSupported();
+  const [subs, active, done] = await Promise.all([
+    sb("push_subscriptions?select=endpoint,p256dh,auth,patient_id"),
+    sb("patients?active=eq.true&select=id"),
+    sb(`assessments?created_at=gte.${enc(sinceIso)}&select=patient_id`),
+  ]);
+  const okIds = new Set(active.map((p) => p.id));
+  const doneIds = new Set(done.map((a) => a.patient_id));
+  return subs.filter((s) => okIds.has(s.patient_id) && !doneIds.has(s.patient_id));
 }
