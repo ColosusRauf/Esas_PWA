@@ -11,9 +11,8 @@ import { fmtDate } from "../format.js";
 import PasswordForm from "../components/PasswordForm.jsx";
 import * as api from "../api.js";
 
-const iconBox = { width: 52, height: 52, borderRadius: 15, background: "var(--primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
-const heading = { fontWeight: 700, fontSize: 18, color: "var(--ink)", marginBottom: 6 };
-const text = { fontSize: 14.5, color: "var(--ink-soft)", margin: "0 0 14px", lineHeight: 1.6 };
+const heading = { fontWeight: 700, fontSize: 17, color: "var(--ink)" };
+const text = { fontSize: 14, color: "var(--ink-soft)", margin: "0 0 12px", lineHeight: 1.55 };
 
 
 export default function Settings({ patientId, onNavigate, onLogout }) {
@@ -45,108 +44,87 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
     <Layout active="settings" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
       title={t("se.title")} subtitle={t("se.sub")}>
       <div className="fit-scroll">
-        <div className="grid-2" style={{ alignItems: "start" }}>
+        <div className="set-top">
           <Card>
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div className="set-ico" style={iconBox}><Palette size={25} color="var(--primary)" /></div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={heading}>{t("se.appearance")}</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-soft)", marginBottom: 6 }}>{t("se.theme")}</div>
-                    <ThemeSegment />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-soft)", marginBottom: 6 }}>{t("se.language")}</div>
-                    <LangSegment />
-                  </div>
-                </div>
+            <div className="set-head"><span className="set-ico"><Palette size={20} color="var(--primary)" /></span><div style={{ ...heading, marginBottom: 0 }}>{t("se.appearance")}</div></div>
+            <div className="set-appearance">
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-soft)", marginBottom: 6 }}>{t("se.theme")}</div>
+                <ThemeSegment />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-soft)", marginBottom: 6 }}>{t("se.language")}</div>
+                <LangSegment />
               </div>
             </div>
           </Card>
+        </div>
 
-          <Card>
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div className="set-ico" style={iconBox}><BellRing size={25} color="var(--primary)" /></div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={heading}>{t("se.reminder")}</div>
-                {push.status === "unsupported" && <p style={text}>{t("se.reminder.unsupported")}</p>}
-                {push.status === "denied" && <p style={text}>{t("se.reminder.denied")}</p>}
-                {push.status === "off" && (
-                  <>
-                    <p style={text}>{t("se.reminder.desc")}</p>
-                    <button onClick={turnOn} disabled={push.busy} style={{ ...primaryBtn, opacity: push.busy ? 0.6 : 1 }}>
-                      {push.busy ? t("se.reminder.working") : t("se.reminder.enable")}
-                    </button>
-                  </>
-                )}
-                {push.status === "on" && (
-                  <>
-                    <p style={{ ...text, color: "var(--mild)", fontWeight: 600 }}>✓ {t("se.reminder.on")}</p>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      <button onClick={sendTest} style={ghostBtn}>{t("se.reminder.test")}</button>
-                      <button onClick={turnOff} disabled={push.busy} style={ghostBtn}>{t("se.reminder.disable")}</button>
-                    </div>
-                  </>
-                )}
-                {pushErr && <p role="alert" className="alert-err" style={{ marginTop: 12, marginBottom: 0 }}>{t(pushErr)}</p>}
-              </div>
-            </div>
-          </Card>
-
-          <Card>
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div className="set-ico" style={iconBox}><Smartphone size={25} color="var(--primary)" /></div>
-              <div style={{ flex: 1 }}>
-                <div style={heading}>{t("se.install")}</div>
-                {inst.installed ? (
-                  <p style={text}>{t("se.installed")}</p>
-                ) : (
-                  <>
-                    {inst.canPrompt ? (
-                      <>
-                        <p style={text}>{t("se.installReady")}</p>
-                        <button onClick={inst.prompt} style={{ ...primaryBtn, display: "inline-flex", alignItems: "center", gap: 10 }}>
-                          <Download size={18} /> {t("se.installBtn")}
-                        </button>
-                      </>
-                    ) : (
-                      <InstallSteps inst={inst} />
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </Card>
-
-          <Card>
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div className="set-ico" style={iconBox}><KeyRound size={25} color="var(--primary)" /></div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={heading}>{t("pw.card")}</div>
-                <p style={text}>{t("pw.cardText")}</p>
-                <PasswordForm onDone={app.passwordChanged} onUnauthorized={onLogout} />
-              </div>
-            </div>
-          </Card>
-
-          <Card>
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              <div className="set-ico" style={iconBox}><ShieldCheck size={25} color="var(--primary)" /></div>
-              <div style={{ flex: 1 }}>
-                <div style={heading}>{t("se.privacyCard")}</div>
-                <p style={{ ...text, marginBottom: 6 }}>{t("se.privacyText")}</p>
-                {app.consent.at && <p style={{ ...text, fontSize: 13.5 }}>{t("se.consentAt", { date: fmtDate(app.consent.at, lang) })}</p>}
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 6 }}>
-                  <button onClick={() => onNavigate("privacy")} style={ghostBtn}>{t("se.privacyBtn")}</button>
-                  <button onClick={onLogout} style={{ ...ghostBtn, color: "var(--severe)", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                    <LogOut size={17} /> {t("nav.logout")}
+        <div className="set-grid">
+          <div className="set-col">
+            <Card>
+              <div className="set-head"><span className="set-ico"><BellRing size={20} color="var(--primary)" /></span><div style={{ ...heading, marginBottom: 0 }}>{t("se.reminder")}</div></div>
+              {push.status === "unsupported" && <p style={text}>{t("se.reminder.unsupported")}</p>}
+              {push.status === "denied" && <p style={text}>{t("se.reminder.denied")}</p>}
+              {push.status === "off" && (
+                <>
+                  <p style={text}>{t("se.reminder.desc")}</p>
+                  <button onClick={turnOn} disabled={push.busy} style={{ ...primaryBtn, opacity: push.busy ? 0.6 : 1 }}>
+                    {push.busy ? t("se.reminder.working") : t("se.reminder.enable")}
                   </button>
-                </div>
-                <p style={{ ...text, marginTop: 14, marginBottom: 0, fontSize: 13.5 }}>{t("se.accountText", { id: patientId })}</p>
+                </>
+              )}
+              {push.status === "on" && (
+                <>
+                  <p style={{ ...text, color: "var(--mild)", fontWeight: 600 }}>✓ {t("se.reminder.on")}</p>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <button onClick={sendTest} style={ghostBtn}>{t("se.reminder.test")}</button>
+                    <button onClick={turnOff} disabled={push.busy} style={ghostBtn}>{t("se.reminder.disable")}</button>
+                  </div>
+                </>
+              )}
+              {pushErr && <p role="alert" className="alert-err" style={{ marginTop: 12, marginBottom: 0 }}>{t(pushErr)}</p>}
+            </Card>
+
+            <Card>
+              <div className="set-head"><span className="set-ico"><Smartphone size={20} color="var(--primary)" /></span><div style={{ ...heading, marginBottom: 0 }}>{t("se.install")}</div></div>
+              {inst.installed ? (
+                <p style={text}>{t("se.installed")}</p>
+              ) : inst.canPrompt ? (
+                <>
+                  <p style={text}>{t("se.installReady")}</p>
+                  <button onClick={inst.prompt} style={{ ...primaryBtn, display: "inline-flex", alignItems: "center", gap: 10 }}>
+                    <Download size={18} /> {t("se.installBtn")}
+                  </button>
+                </>
+              ) : (
+                <InstallSteps inst={inst} />
+              )}
+            </Card>
+          </div>
+
+          <div className="set-col">
+            <Card>
+              <div className="set-head"><span className="set-ico"><ShieldCheck size={20} color="var(--primary)" /></span><div style={{ ...heading, marginBottom: 0 }}>{t("se.privacyCard")}</div></div>
+              <p style={{ ...text, marginBottom: 6 }}>{t("se.privacyText")}</p>
+              {app.consent.at && <p style={{ ...text, fontSize: 13.5 }}>{t("se.consentAt", { date: fmtDate(app.consent.at, lang) })}</p>}
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 6 }}>
+                <button onClick={() => onNavigate("privacy")} style={ghostBtn}>{t("se.privacyBtn")}</button>
+                <button onClick={onLogout} style={{ ...ghostBtn, color: "var(--severe)", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <LogOut size={17} /> {t("nav.logout")}
+                </button>
               </div>
-            </div>
-          </Card>
+              <p style={{ ...text, marginTop: 14, marginBottom: 0, fontSize: 13.5 }}>{t("se.accountText", { id: patientId })}</p>
+            </Card>
+          </div>
+
+          <div className="set-col">
+            <Card>
+              <div className="set-head"><span className="set-ico"><KeyRound size={20} color="var(--primary)" /></span><div style={{ ...heading, marginBottom: 0 }}>{t("pw.card")}</div></div>
+              <p style={text}>{t("pw.cardText")}</p>
+              <PasswordForm onDone={app.passwordChanged} onUnauthorized={onLogout} compact />
+            </Card>
+          </div>
         </div>
       </div>
     </Layout>

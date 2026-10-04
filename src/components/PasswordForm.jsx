@@ -25,7 +25,7 @@ function Field({ id, label, value, onChange, show, onToggle, auto }) {
 }
 
 // Dipakai di Pengaturan dan di layar "wajib ganti password".
-export default function PasswordForm({ onDone, onUnauthorized, extra }) {
+export default function PasswordForm({ onDone, onUnauthorized, extra, compact }) {
   const { t } = useLang();
   const [oldPw, setOld] = useState("");
   const [newPw, setNew] = useState("");
@@ -55,7 +55,7 @@ export default function PasswordForm({ onDone, onUnauthorized, extra }) {
   const strength = newPw.length === 0 ? 0 : newPw.length < 8 ? 1 : /(?=.*[A-Za-z])(?=.*\d)/.test(newPw) && newPw.length >= 10 ? 3 : 2;
 
   return (
-    <form onSubmit={submit} noValidate>
+    <form onSubmit={submit} noValidate className={compact ? "pw-compact" : undefined}>
       <Field id="pw-old" label={t("pw.old")} value={oldPw} onChange={setOld} show={show} onToggle={() => setShow((s) => !s)} auto="current-password" />
       <Field id="pw-new" label={t("pw.new")} value={newPw} onChange={setNew} show={show} onToggle={() => setShow((s) => !s)} auto="new-password" />
       <div className="pw-meter" aria-hidden="true">
