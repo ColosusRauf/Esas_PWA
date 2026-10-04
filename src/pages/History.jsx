@@ -7,6 +7,8 @@ import { Card, th, td } from "../components/ui.jsx";
 import { useApp } from "../appContext.jsx";
 import { useLang } from "../i18n.jsx";
 import { useMobile } from "../useMedia.js";
+import EmptyState from "../components/EmptyState.jsx";
+import { tipsFor } from "../tips.js";
 import RecordCard from "../components/RecordCard.jsx";
 import { DOMAINS, totalOf, severity, SEV_COLOR, SEV_LABEL_L } from "../data.js";
 import { fmtDate, dayKeyWIB, todayKeyWIB } from "../format.js";
@@ -66,7 +68,7 @@ export default function History({ patientId, assessments, onNavigate, onLogout }
       <div className="grid-2 fit-fill history-grid">
         <Card bodyStyle={{ overflow: "hidden" }}>
           {assessments.length === 0 ? (
-            <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>{t("hi.empty")}</p>
+            <EmptyState kind="list" title={t("hi.empty")} text={t("es.startText")} />
           ) : (
             <>
               <div className="hist-bar">
@@ -91,7 +93,7 @@ export default function History({ patientId, assessments, onNavigate, onLogout }
 
               <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
                 {filtered.length === 0 ? (
-                  <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: "8px 0 0" }}>{t("hi.noResult")}</p>
+                  <EmptyState kind="search" compact title={t("hi.noResult")} />
                 ) : (
 mobile ? (
                     <div>
@@ -175,6 +177,7 @@ function Detail({ item }) {
           );
         })}
       </div>
+      <Tips answers={item.answers} />
       <div className="chart-box" role="img" aria-label={t("hi.chartAria")}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
@@ -189,6 +192,25 @@ function Detail({ item }) {
         </ResponsiveContainer>
       </div>
     </Card>
+  );
+}
+
+// Tips untuk gejala yang skornya >= 4 (maksimal 3 gejala tertinggi)
+function Tips({ answers }) {
+  const { t, lang } = useLang();
+  const list = DOMAINS.map((d, i) => ({ d, v: answers[i] })).filter((x) => x.v >= 4).sort((a, b) => b.v - a.v).slice(0, 3);
+  if (!list.length) return null;
+  return (
+    <details className="tips">
+      <summary>{t("tips.title")} ({list.length})</summary>
+      {list.map(({ d, v }) => (
+        <div key={d.key} className="tips-item">
+          <b style={{ color: SEV_COLOR[severity(v)] }}>{shortName(d, lang)} ({v})</b>
+          <ul>{tipsFor(d.key, lang).map((x, i) => <li key={i}>{x}</li>)}</ul>
+        </div>
+      ))}
+      <small>{t("tips.disclaimer")}</small>
+    </details>
   );
 }
 

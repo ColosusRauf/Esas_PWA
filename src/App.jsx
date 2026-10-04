@@ -8,6 +8,10 @@ import Profile from "./pages/Profile.jsx";
 import Settings from "./pages/Settings.jsx";
 import Privacy, { CONSENT_VERSION } from "./pages/Privacy.jsx";
 import ConsentGate from "./components/ConsentGate.jsx";
+import ForcePassword from "./components/ForcePassword.jsx";
+import Celebrate from "./components/Celebrate.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import { encouragement } from "./insights.js";
 import AdminApp from "./admin/AdminApp.jsx";
 import { AppContext } from "./appContext.jsx";
 import { useLang } from "./i18n.jsx";
@@ -53,6 +57,8 @@ export default function App() {
   const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine !== false));
   const [syncState, setSyncState] = useState({ status: "idle", error: null, lastSync: null });
   const [consent, setConsent] = useState({ known: false, consented: false, at: null });
+  const [celebrate, setCelebrate] = useState(null);
+  const [notFound, setNotFound] = useState(() => typeof location !== "undefined" && !["/", "/index.html"].includes(location.pathname));
   const push = usePush(patientId);
   const recordsRef = useRef(records);
   recordsRef.current = records;
@@ -67,6 +73,7 @@ export default function App() {
     try { localStorage.removeItem(KEY_SESSION); localStorage.removeItem(KEY_CACHE); } catch {}
     setRecords([]);
     setSession(null);
+    setCelebrate(null);
     setConsent({ known: false, consented: false, at: null });
     setSyncState({ status: "idle", error: null, lastSync: null });
     setNavState(null);
@@ -165,7 +172,7 @@ export default function App() {
     try {
       const res = await api.login(id, password, role);
       api.setToken(res.token);
-      const next = { id: res.id, role: res.role, name: res.name };
+      const next = { id: res.id, role: res.role, name: res.name, mustChange: res.mustChange === true };
       save(KEY_SESSION, next);
       setRecords([]);
       setSession(next);
@@ -179,9 +186,20 @@ export default function App() {
     }
   }
 
+  const passwordChanged = useCallback(() => {
+    setSession((cur) => {
+      if (!cur) return cur;
+      const next = { ...cur, mustChange: false };
+      save(KEY_SESSION, next);
+      return next;
+    });
+    toast(t("pw.done"));
+  }, [t, toast]);
+
   function submitAssessment(answers) {
     const rec = { clientId: crypto.randomUUID(), createdAt: new Date().toISOString(), answers, synced: false };
     setRecords((prev) => [...prev, rec]);
+    setCelebrate(encouragement([...recordsRef.current, rec].map(toAssessment)));
     toast(online ? t("toast.saved") : t("toast.savedOffline"));
     setNavState({ openId: rec.clientId });
     setView("history");
@@ -196,11 +214,12 @@ export default function App() {
   const assessments = useMemo(() => records.map(toAssessment), [records]);
   const pending = assessments.filter((a) => !a.synced).length;
   const ctx = useMemo(() => ({
-    patientId, assessments, navigate, logout, online, navState, push, consent,
+    patientId, assessments, navigate, logout, online, navState, push, consent, passwordChanged,
     ready: records.length > 0 || syncState.lastSync != null,
     sync: { ...syncState, pending, run: () => syncRef.current(true) },
-  }), [patientId, assessments, navigate, logout, online, navState, push, consent, records.length, syncState, pending]);
+  }), [patientId, assessments, navigate, logout, online, navState, push, consent, passwordChanged, records.length, syncState, pending]);
 
+  if (notFound) return <NotFound onHome={() => { try { history.replaceState(null, "", "/"); } catch {} setNotFound(false); }} />;
   if (isStaff) return <AdminApp session={session} onLogout={logout} />;
   if (!PUBLIC_VIEWS.includes(view) && !patientId) return <Login onLogin={login} {...loginState} onBack={() => navigate("landing")} onPrivacy={() => navigate("privacy")} />;
 
@@ -231,10 +250,13 @@ export default function App() {
       return <Landing onGetStarted={() => navigate("login")} onLogin={() => navigate("login")} onPrivacy={() => navigate("privacy")} />;
   }
 
-  const gated = !!patientId && consent.known && !consent.consented;
+  const mustChange = !!patientId && session?.mustChange === true;
+  const gated = !!patientId && !mustChange && consent.known && !consent.consented;
   return (
     <AppContext.Provider value={ctx}>
       {page}
+      {celebrate && !mustChange && !gated && <Celebrate info={celebrate} onClose={() => setCelebrate(null)} />}
+      {mustChange && <ForcePassword onDone={passwordChanged} onLogout={logout} />}
       {gated && <ConsentGate onAccept={acceptConsent} onLogout={logout} onReadPolicy={() => navigate("privacy")} />}
     </AppContext.Provider>
   );

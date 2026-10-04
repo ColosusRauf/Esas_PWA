@@ -1,5 +1,5 @@
 import { signToken, isPatientId } from "./_lib.js";
-import { verifyLogin, verifyStaff, logActivity } from "./_store.js";
+import { verifyLogin, verifyStaff, logActivity, mustChangePassword } from "./_store.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "METHOD_NOT_ALLOWED" });
@@ -20,7 +20,8 @@ export default async function handler(req, res) {
     }
     await logActivity({ actor: session.id, role: session.role, action: "LOGIN", target: session.id });
     const token = signToken({ sub: session.id, role: session.role }, process.env.SESSION_SECRET);
-    return res.status(200).json({ token, id: session.id, role: session.role, name: session.name });
+    const mustChange = session.role === "patient" ? await mustChangePassword(session.id) : false;
+    return res.status(200).json({ token, id: session.id, role: session.role, name: session.name, mustChange });
   } catch (e) {
     console.error(e);
     return res.status(502).json({ error: "UPSTREAM" });

@@ -46,6 +46,7 @@ export const createAssessment = ({ clientId, answers }) =>
   call("/api/assessments", { method: "POST", body: { clientId, answers } });
 export const getConsent = () => call("/api/consent");
 export const postConsent = (version) => call("/api/consent", { method: "POST", body: { version } });
+export const changePassword = (oldPassword, newPassword) => call("/api/password", { method: "POST", body: { oldPassword, newPassword } });
 export const pushKey = () => call("/api/push");
 export const pushSubscribe = (subscription) => call("/api/push", { method: "POST", body: { subscription } });
 export const pushUnsubscribe = (endpoint, token) => call("/api/push", { method: "DELETE", body: { endpoint }, token });
@@ -58,5 +59,6 @@ export const adminCreatePatient = (body) => call("/api/admin/patients", { method
 
 export const adminUpdatePatient = (body) => call("/api/admin/patients", { method: "PATCH", body });
 export const adminResetPassword = (body) => call("/api/admin/reset-password", { method: "POST", body });
+export const adminCapacity = () => call("/api/admin/capacity");
 export const adminLogs = async () => (await call("/api/admin/logs")).items;
 export const adminLogExport = (body) => call("/api/admin/log", { method: "POST", body });

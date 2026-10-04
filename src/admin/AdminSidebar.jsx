@@ -1,11 +1,12 @@
 import React from "react";
 import { ThemeSegment } from "../components/Toggles.jsx";
-import { LayoutDashboard, Users, BarChart3, ScrollText, LogOut, HeartPulse, RefreshCw } from "lucide-react";
+import { LayoutDashboard, Users, BarChart3, ScrollText, LogOut, HeartPulse, RefreshCw, Gauge } from "lucide-react";
 
 const ITEMS = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "patients", label: "Pasien", icon: Users },
   { key: "analytics", label: "Analitik & Ekspor", icon: BarChart3 },
+  { key: "capacity", label: "Kapasitas", icon: Gauge, adminOnly: true },
   { key: "logs", label: "Log aktivitas", icon: ScrollText, adminOnly: true },
 ];
 const ROLE = { admin: "Admin", researcher: "Peneliti" };

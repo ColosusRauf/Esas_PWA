@@ -6,6 +6,7 @@ import Patients from "./Patients.jsx";
 import PatientDetail from "./PatientDetail.jsx";
 import Analytics from "./Analytics.jsx";
 import Logs from "./Logs.jsx";
+import Capacity from "./Capacity.jsx";
 import { ghostBtn } from "./ui.jsx";
 import * as api from "../api.js";
 
@@ -54,7 +55,8 @@ export default function AdminApp({ session, onLogout }) {
           <Patients {...data} isAdmin={isAdmin} onOpen={(id) => go("patients", id)} onCreated={load} />
         )}
         {view === "patients" && patientId && <PatientDetail {...data} id={patientId} isAdmin={isAdmin} onChanged={load} onBack={() => go("patients")} />}
-        {view === "analytics" && <Analytics {...data} />}
+        {view === "analytics" && <Analytics {...data} isAdmin={isAdmin} />}
+        {view === "capacity" && isAdmin && <Capacity onUnauthorized={onLogout} />}
         {view === "logs" && isAdmin && <Logs onUnauthorized={onLogout} />}
         </div>
       </main>

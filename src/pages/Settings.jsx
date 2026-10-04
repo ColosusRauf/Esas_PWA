@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useInstall } from "../pwa.js";
-import { Download, LogOut, Smartphone, Palette, BellRing, ShieldCheck } from "lucide-react";
+import { Download, LogOut, Smartphone, Palette, BellRing, ShieldCheck, KeyRound } from "lucide-react";
 import Layout from "../components/Layout.jsx";
 import { Card, primaryBtn, ghostBtn } from "../components/ui.jsx";
 import { ThemeSegment, LangSegment } from "../components/Toggles.jsx";
@@ -8,6 +8,7 @@ import { useToast } from "../components/Toast.jsx";
 import { useApp } from "../appContext.jsx";
 import { useLang } from "../i18n.jsx";
 import { fmtDate } from "../format.js";
+import PasswordForm from "../components/PasswordForm.jsx";
 import * as api from "../api.js";
 
 const iconBox = { width: 52, height: 52, borderRadius: 15, background: "var(--primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
@@ -114,6 +115,17 @@ export default function Settings({ patientId, onNavigate, onLogout }) {
                     )}
                   </>
                 )}
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+              <div className="set-ico" style={iconBox}><KeyRound size={25} color="var(--primary)" /></div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={heading}>{t("pw.card")}</div>
+                <p style={text}>{t("pw.cardText")}</p>
+                <PasswordForm onDone={app.passwordChanged} onUnauthorized={onLogout} />
               </div>
             </div>
           </Card>

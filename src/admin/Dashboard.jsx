@@ -1,12 +1,15 @@
-import React, { useMemo } from "react";
-import { Users, ClipboardCheck, Activity, AlertTriangle } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Users, ClipboardCheck, Activity, AlertTriangle, CalendarX } from "lucide-react";
 import { Card, StatCard, Empty, th, td, PageTitle } from "./ui.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 import { TrendChart, Distribution } from "./charts.jsx";
 import {
-  dayKey, fmtDate, inPeriod, mean, r1, trend, distribution, withTotal, latestByPatient, severeSymptoms, topSymptom, who,
+  dayKey, fmtDate, inPeriod, mean, r1, trend, distribution, withTotal, latestByPatient, severeSymptoms, topSymptom, who, missingPatients,
 } from "./stats.js";
 
 export default function Dashboard({ patients, assessments, byId, onOpenPatient, onNavigate }) {
+  const [tab, setTab] = useState("severe");
+  const [missDays, setMissDays] = useState(3);
   const m = useMemo(() => {
     const today = dayKey(new Date().toISOString());
     const cur = inPeriod(assessments, 30);
@@ -32,11 +35,13 @@ export default function Dashboard({ patients, assessments, byId, onOpenPatient, 
     };
   }, [patients, assessments]);
 
+  const missing = useMemo(() => missingPatients(patients, assessments, missDays), [patients, assessments, missDays]);
+
   return (
     <>
       <PageTitle title="Dashboard" sub="Ringkasan pasien dan hasil assessment ESAS." />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
         <StatCard icon={Users} label="Pasien aktif" value={m.active} />
         <StatCard icon={ClipboardCheck} label="Assessment hari ini" value={m.todayCount} />
         <StatCard
@@ -45,29 +50,63 @@ export default function Dashboard({ patients, assessments, byId, onOpenPatient, 
           subTone={m.delta > 0 ? "up" : m.delta < 0 ? "down" : undefined}
         />
         <StatCard icon={AlertTriangle} label="Perlu perhatian" value={m.attention.length} sub="gejala > 6, 14 hari terakhir" />
+        <StatCard icon={CalendarX} label="Belum mengisi" value={missing.length} sub={`≥ ${missDays} hari, pasien aktif`} />
       </div>
 
       <div className="fit-rows">
         <Card title="Tren rata-rata skor (7 hari)"><TrendChart data={m.trend7} /></Card>
         <Card title="Distribusi total skor (30 hari)"><Distribution bins={m.dist} /></Card>
-        <Card title="Perlu perhatian">
-          {m.attention.length === 0 ? (
-            <Empty>Tidak ada pasien dengan gejala berat pada assessment terakhirnya.</Empty>
+        <Card title="Peringatan" action={
+          <div className="chips">
+            <button className={"chip" + (tab === "severe" ? " on" : "")} onClick={() => setTab("severe")}>Gejala berat ({m.attention.length})</button>
+            <button className={"chip" + (tab === "missing" ? " on" : "")} onClick={() => setTab("missing")}>Belum mengisi ({missing.length})</button>
+          </div>}>
+          {tab === "severe" ? (
+            m.attention.length === 0 ? (
+              <EmptyState kind="list" compact title="Tidak ada gejala berat" text="Tidak ada pasien dengan gejala berat pada assessment terakhirnya." />
+            ) : (
+              <div className="table-wrap">
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead><tr><th style={th}>Pasien</th><th style={th}>Tanggal</th><th style={th}>Gejala berat</th></tr></thead>
+                  <tbody>
+                    {m.attention.slice(0, 8).map(({ a, sev }) => (
+                      <tr key={a.clientId} onClick={() => onOpenPatient(a.patientId)} style={{ cursor: "pointer" }}>
+                        <td style={{ ...td, fontWeight: 600 }}>{who(byId, a.patientId)}</td>
+                        <td style={td}>{fmtDate(a.createdAt)}</td>
+                        <td style={{ ...td, color: "var(--severe)" }}>{sev.slice(0, 3).map((s) => `${s.label} ${s.v}`).join(", ")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
           ) : (
-            <div className="table-wrap">
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead><tr><th style={th}>Pasien</th><th style={th}>Tanggal</th><th style={th}>Gejala berat</th></tr></thead>
-                <tbody>
-                  {m.attention.slice(0, 8).map(({ a, sev }) => (
-                    <tr key={a.clientId} onClick={() => onOpenPatient(a.patientId)} style={{ cursor: "pointer" }}>
-                      <td style={{ ...td, fontWeight: 600 }}>{who(byId, a.patientId)}</td>
-                      <td style={td}>{fmtDate(a.createdAt)}</td>
-                      <td style={{ ...td, color: "var(--severe)" }}>{sev.slice(0, 3).map((s) => `${s.label} ${s.v}`).join(", ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 12.5, color: "var(--ink-soft)" }}>
+                <label htmlFor="miss-days">Tidak mengisi selama minimal</label>
+                <select id="miss-days" value={missDays} onChange={(e) => setMissDays(Number(e.target.value))} style={{ padding: "4px 8px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--ink)" }}>
+                  {[2, 3, 5, 7, 14].map((d) => <option key={d} value={d}>{d} hari</option>)}
+                </select>
+              </div>
+              {missing.length === 0 ? (
+                <EmptyState kind="calendar" compact title="Semua pasien aktif rutin mengisi" />
+              ) : (
+                <div className="table-wrap">
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead><tr><th style={th}>Pasien</th><th style={th}>Terakhir mengisi</th><th style={th}>Lama</th></tr></thead>
+                    <tbody>
+                      {missing.slice(0, 8).map((x) => (
+                        <tr key={x.id} onClick={() => onOpenPatient(x.id)} style={{ cursor: "pointer" }}>
+                          <td style={{ ...td, fontWeight: 600 }}>{who(byId, x.id)}</td>
+                          <td style={td}>{x.lastAt ? fmtDate(x.lastAt) : "Belum pernah"}</td>
+                          <td style={{ ...td, color: "var(--moderate)", fontWeight: 600 }}>{x.since} hari</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </Card>
 

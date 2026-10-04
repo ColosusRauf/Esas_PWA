@@ -249,3 +249,45 @@ export async function listDueSubs(sinceIso) {
   const doneIds = new Set(done.map((a) => a.patient_id));
   return subs.filter((s) => okIds.has(s.patient_id) && !doneIds.has(s.patient_id));
 }
+
+// ---------- keamanan akun (butuh supabase/06_security.sql) ----------
+// Bila SQL-nya belum dijalankan, login tetap berfungsi seperti biasa (tanpa paksa ganti password).
+export async function mustChangePassword(patientId) {
+  if (!useSupabase()) return false;
+  try {
+    const r = (await sb(`patients?id=eq.${enc(patientId)}&select=must_change_password`))?.[0];
+    return r?.must_change_password === true;
+  } catch { return false; }
+}
+
+// -> true jika password lama benar & sudah diganti
+export async function changePassword(patientId, oldPw, newPw) {
+  if (!useSupabase()) notSupported();
+  return (await sb("rpc/esas_change_password", { method: "POST", body: JSON.stringify({ pid: patientId, old_pw: oldPw, new_pw: newPw }) })) === true;
+}
+
+// ---------- kapasitas (admin) ----------
+async function countOf(table, filter = "") {
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  const r = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}?select=*${filter}`, {
+    method: "HEAD",
+    headers: {
+      apikey: key,
+      ...(String(key).startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}),
+      Prefer: "count=exact",
+    },
+  });
+  if (!r.ok) throw new Error(`count ${table} -> ${r.status}`);
+  return Number((r.headers.get("content-range") || "").split("/")[1]) || 0;
+}
+
+export async function getCapacity() {
+  if (!useSupabase()) notSupported();
+  const [patients, activePatients, assessments, logs, pushSubs] = await Promise.all([
+    countOf("patients"), countOf("patients", "&active=eq.true"), countOf("assessments"),
+    countOf("activity_logs"), countOf("push_subscriptions"),
+  ]);
+  let dbBytes = null;
+  try { dbBytes = Number(await sb("rpc/esas_db_size", { method: "POST", body: "{}" })) || null; } catch {}
+  return { patients, activePatients, assessments, logs, pushSubs, dbBytes, dbLimitBytes: 500 * 1024 * 1024 };
+}

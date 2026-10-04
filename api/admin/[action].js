@@ -1,6 +1,6 @@
 import { sessionFromRequest, isPatientId, isIsoDate } from "../_lib.js";
 import {
-  listPatients, createPatient, updatePatient, resetPassword, listAllAssessments, listLogs, logActivity,
+  listPatients, createPatient, updatePatient, resetPassword, listAllAssessments, listLogs, logActivity, getCapacity,
 } from "../_store.js";
 
 const validName = (v) => typeof v === "string" && v.trim().length >= 1 && v.trim().length <= 100;
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     // ---- catat ekspor (admin & peneliti) ----
     if (action === "log" && m === "POST") {
       const { kind, from, to, count } = body;
-      const ok = ["full", "summary"].includes(kind) && isIsoDate(from) && isIsoDate(to) && Number.isInteger(count) && count >= 0 && count < 1e7;
+      const ok = ["full", "summary", "dictionary", "backup"].includes(kind) && isIsoDate(from) && isIsoDate(to) && Number.isInteger(count) && count >= 0 && count < 1e7;
       if (!ok) return res.status(400).json({ error: "BAD_REQUEST" });
       await logActivity({ ...actor, action: "EXPORT_CSV", target: kind, detail: `${from} s/d ${to}, ${count} assessment` });
       return res.status(201).json({ ok: true });
@@ -41,6 +41,10 @@ export default async function handler(req, res) {
 
     // ---- hanya admin ----
     if (!isAdmin) return res.status(403).json({ error: "FORBIDDEN" });
+
+    if (action === "capacity" && m === "GET") {
+      return res.status(200).json(await getCapacity());
+    }
 
     if (action === "patients" && m === "POST") {
       const { id, name, birthDate, sex, password } = body;
@@ -89,6 +93,7 @@ export default async function handler(req, res) {
 
     return res.status(404).json({ error: "NOT_FOUND" });
   } catch (e) {
+    if (e.status === 501) return res.status(501).json({ error: "NOT_SUPPORTED" });
     console.error(e);
     return res.status(502).json({ error: "UPSTREAM" });
   }

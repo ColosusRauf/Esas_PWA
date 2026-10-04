@@ -83,6 +83,10 @@ Catatan: untuk query dengan parameter opsional (kolom yang tidak diubah dikirim 
 bukan daftar dipisah koma. Bentuk array bergantung pada versi n8n Anda, jadi uji tiap workflow dengan *Execute workflow*
 sebelum diaktifkan. Jika bermasalah, `STORE=supabase` tidak punya batasan ini.
 
+## 2d. Izin database (wajib)
+Jalankan `supabase/04_grants.sql` setelah `03_manage.sql`. Tanpa ini login gagal dengan error 403 dari Supabase,
+karena kunci server belum punya izin ke fungsi dan tabel.
+
 ## 3. GitHub -> Vercel
 ```
 git init && git add . && git commit -m "ESAS PWA"

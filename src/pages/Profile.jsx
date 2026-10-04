@@ -2,6 +2,8 @@ import React from "react";
 import { ClipboardCheck, Gauge, CalendarClock, User } from "lucide-react";
 import Layout from "../components/Layout.jsx";
 import { Card } from "../components/ui.jsx";
+import AdherenceCard from "../components/AdherenceCard.jsx";
+import SymptomTrend from "../components/SymptomTrend.jsx";
 import { totalOf } from "../data.js";
 import { useLang } from "../i18n.jsx";
 import { dayKeyWIB } from "../format.js";
@@ -22,6 +24,7 @@ export default function Profile({ patientId, assessments, onNavigate, onLogout }
   return (
     <Layout active="profile" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
       title={t("pr.title")} subtitle={t("pr.sub")}>
+      <div className="fit-scroll" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 380px) 1fr", gap: 20, alignItems: "start" }} className="profile-grid">
         <Card style={{ textAlign: "center" }} bodyStyle={{ justifyContent: "center" }}>
           <div style={{
@@ -51,6 +54,11 @@ export default function Profile({ patientId, assessments, onNavigate, onLogout }
             </Card>
           ))}
         </div>
+      </div>
+      <div className="grid-2" style={{ alignItems: "start" }}>
+        <AdherenceCard assessments={assessments} />
+        <SymptomTrend assessments={assessments} />
+      </div>
       </div>
     </Layout>
   );

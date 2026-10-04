@@ -1,5 +1,7 @@
 import React from "react";
-import { CalendarPlus, CalendarCheck } from "lucide-react";
+import { CalendarPlus, CalendarCheck, Flame } from "lucide-react";
+import EmptyState from "../components/EmptyState.jsx";
+import { streaks } from "../insights.js";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import Layout from "../components/Layout.jsx";
 import ScoreRing from "../components/ScoreRing.jsx";
@@ -26,6 +28,7 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
     ? DOMAINS.map((d, i) => ({ ...d, v: latest.answers[i] })).sort((a, b) => b.v - a.v).slice(0, 5)
     : [];
 
+  const streak = streaks(assessments).current;
   const Icon = doneToday ? CalendarCheck : CalendarPlus;
 
   return (
@@ -45,6 +48,7 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
               <div style={{ fontSize: 15, color: doneToday ? "var(--mild)" : "var(--ink-soft)", marginTop: 3 }}>
                 {doneToday ? t("dash.done") : t("dash.notyet")}
               </div>
+              {streak >= 2 && <div className="streak-chip"><Flame size={14} /> {t("cel.streak", { n: streak })}</div>}
             </div>
           </div>
           <button onClick={onStartAssessment} style={{ ...primaryBtn, width: "100%", padding: "14px 20px", fontSize: 16, borderRadius: 14 }}>
@@ -71,7 +75,7 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
       <div className="grid-2 fit-fill">
         <Card title={t("dash.history")} action={<button onClick={() => onNavigate("history")} style={linkBtn}>{t("dash.viewall")}</button>}>
           {assessments.length === 0 ? (
-            <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: 0 }}>{t("dash.emptyHistory")}</p>
+            <EmptyState kind="list" compact title={t("dash.emptyHistory")} text={t("es.startText")} />
           ) : (
 mobile ? (
               <div>

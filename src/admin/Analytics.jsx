@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { ArrowUpToLine, ArrowDownToLine, Sigma, Gauge, Download } from "lucide-react";
-import { Card, StatCard, PageTitle, primaryBtn, inputStyle } from "./ui.jsx";
+import { ArrowUpToLine, ArrowDownToLine, Sigma, Gauge, Download, BookOpen, DatabaseBackup } from "lucide-react";
+import { Card, StatCard, PageTitle, primaryBtn, ghostBtn, inputStyle } from "./ui.jsx";
 import { TrendChart, Distribution, SymptomBars } from "./charts.jsx";
 import {
-  inPeriod, inDateRange, withTotal, mean, sd, r1, trend, symptomMeans, distribution, fullCsv, summaryCsv, downloadCsv, dayKey, fmtDate,
+  inPeriod, inDateRange, withTotal, mean, sd, r1, trend, symptomMeans, distribution, fullCsv, summaryCsv, dictionaryCsv, downloadCsv, dayKey, fmtDate,
 } from "./stats.js";
 import * as api from "../api.js";
 
 const RANGES = [[7, "7 hari"], [30, "30 hari"], [90, "3 bulan"], [180, "6 bulan"], [365, "1 tahun"]];
 
-export default function Analytics({ assessments }) {
+export default function Analytics({ assessments, patients = [], isAdmin }) {
   const [days, setDays] = useState(30);
   const items = useMemo(() => inPeriod(assessments, days), [assessments, days]);
   const prev = useMemo(() => inPeriod(assessments, days, 1), [assessments, days]);
@@ -59,13 +59,13 @@ export default function Analytics({ assessments }) {
         <Card title={`Tren total skor ESAS (${days <= 31 ? "per hari" : "per minggu"})`}><TrendChart data={s.trend} /></Card>
         <Card title="Rata-rata skor per gejala"><SymptomBars rows={s.sym} /></Card>
         <Card title="Distribusi total skor ESAS"><Distribution bins={s.dist} /></Card>
-        <ExportPanel assessments={assessments} />
+        <ExportPanel assessments={assessments} patients={patients} isAdmin={isAdmin} />
       </div>
     </>
   );
 }
 
-function ExportPanel({ assessments }) {
+function ExportPanel({ assessments, patients, isAdmin }) {
   const today = dayKey(new Date().toISOString());
   const [from, setFrom] = useState(() => dayKey(new Date(Date.now() - 29 * 864e5).toISOString()));
   const [to, setTo] = useState(today);
@@ -78,6 +78,24 @@ function ExportPanel({ assessments }) {
     const csv = kind === "full" ? fullCsv(rows) : summaryCsv(rows);
     downloadCsv(`esas-${kind === "full" ? "lengkap" : "ringkasan"}-${from}_${to}.csv`, csv);
     api.adminLogExport({ kind, from, to, count: rows.length }).catch(() => {}); // pencatatan ekspor, tidak menghalangi unduhan
+  }
+
+  const stamp = dayKey(new Date().toISOString());
+  function dictionary() {
+    downloadCsv(`esas-kamus-data-${stamp}.csv`, dictionaryCsv());
+    api.adminLogExport({ kind: "dictionary", from: stamp, to: stamp, count: 0 }).catch(() => {});
+  }
+  function backup() {
+    const data = {
+      aplikasi: "ESAS", dibuat: new Date().toISOString(), jumlah_pasien: patients.length, jumlah_assessment: assessments.length,
+      pasien: patients, assessment: assessments,
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = `esas-cadangan-${stamp}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    api.adminLogExport({ kind: "backup", from: stamp, to: stamp, count: assessments.length }).catch(() => {});
   }
 
   const opt = (value, title, desc) => (
@@ -109,6 +127,17 @@ function ExportPanel({ assessments }) {
       <button onClick={run} disabled={!rows.length} style={{ ...primaryBtn, width: "100%", display: "inline-flex", justifyContent: "center", alignItems: "center", gap: 8, opacity: rows.length ? 1 : 0.5, cursor: rows.length ? "pointer" : "not-allowed" }}>
         <Download size={16} /> Ekspor CSV
       </button>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+        <button onClick={dictionary} style={{ ...ghostBtn, flex: "1 1 150px", display: "inline-flex", justifyContent: "center", alignItems: "center", gap: 7 }}>
+          <BookOpen size={15} /> Kamus data
+        </button>
+        {isAdmin && (
+          <button onClick={backup} style={{ ...ghostBtn, flex: "1 1 150px", display: "inline-flex", justifyContent: "center", alignItems: "center", gap: 7 }}>
+            <DatabaseBackup size={15} /> Cadangan lengkap
+          </button>
+        )}
+      </div>
+      {isAdmin && <p style={{ fontSize: 11.5, color: "var(--ink-soft)", margin: "8px 0 0" }}>Cadangan (JSON) memuat nama pasien. Simpan di tempat aman dan jangan dibagikan.</p>}
       <p style={{ fontSize: 12, color: "var(--ink-soft)", textAlign: "center", margin: "10px 0 0" }}>
         {rows.length ? `${rows.length} assessment dari ${nPatients} pasien` : "Tidak ada data pada rentang ini."}
       </p>

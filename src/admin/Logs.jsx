@@ -11,7 +11,9 @@ const ACTIONS = {
   UPDATE_PATIENT: "Data pasien diubah",
   SET_ACTIVE: "Status pasien diubah",
   RESET_PASSWORD: "Password direset",
-  EXPORT_CSV: "Ekspor CSV",
+  EXPORT_CSV: "Ekspor data",
+  PASSWORD_CHANGE: "Password diganti pasien",
+  CONSENT: "Persetujuan privasi",
 };
 const ROLE = { patient: "Pasien", admin: "Admin", researcher: "Peneliti" };
 const time = (iso) => new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: TZ });

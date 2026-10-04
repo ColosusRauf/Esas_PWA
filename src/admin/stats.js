@@ -89,6 +89,43 @@ export const topSymptom = (a) => {
   return s;
 };
 
+// A4: pasien aktif yang belum mengisi >= days hari (atau belum pernah mengisi sejak akun dibuat)
+export function missingPatients(patients, assessments, days) {
+  const last = latestByPatient(assessments);
+  const now = Date.now();
+  const out = [];
+  for (const p of patients) {
+    if (p.active === false) continue;
+    const a = last.get(p.id);
+    const ref = a ? +new Date(a.createdAt) : p.createdAt ? +new Date(p.createdAt) : null;
+    if (ref == null) continue;
+    const since = Math.floor((now - ref) / 864e5);
+    if (since >= days) out.push({ id: p.id, since, lastAt: a?.createdAt || null });
+  }
+  return out.sort((x, y) => y.since - x.since);
+}
+
+// A5: kamus data untuk berkas CSV
+export function dictionaryCsv() {
+  const rows = [
+    ["berkas", "kolom", "tipe", "deskripsi", "nilai"],
+    ["lengkap", "patient_id", "teks", "Kode pasien (tanpa nama)", ""],
+    ["lengkap", "tanggal", "tanggal", "Tanggal pengisian, zona waktu WIB", "YYYY-MM-DD"],
+    ["lengkap", "waktu_wib", "waktu", "Jam pengisian, zona waktu WIB", "HH:MM"],
+    ...DOMAINS.map((d) => ["lengkap", d.key, "angka", `Skor gejala: ${d.label}`, `0 = ${d.lo}; 10 = ${d.hi}`]),
+    ["lengkap", "total_skor", "angka", "Jumlah 10 skor gejala", `0-${DOMAINS.length * 10}`],
+    ["ringkasan", "patient_id", "teks", "Kode pasien", ""],
+    ["ringkasan", "jumlah_assessment", "angka", "Banyak pengisian pada rentang tanggal", ""],
+    ["ringkasan", "rata_total", "angka", "Rata-rata total skor", ""],
+    ["ringkasan", "min_total", "angka", "Total skor terendah", ""],
+    ["ringkasan", "max_total", "angka", "Total skor tertinggi", ""],
+    ["ringkasan", "sd_total", "angka", "Simpangan baku sampel (n-1)", ""],
+    ["ringkasan", "assessment_terakhir", "tanggal", "Tanggal pengisian terakhir", "YYYY-MM-DD"],
+    ["catatan", "tingkat keparahan", "", "Ringan 0-3, sedang 4-6, berat 7-10 per gejala", ""],
+  ];
+  return toCsv(rows);
+}
+
 export const ageOf = (birthDate) => {
   if (!birthDate) return null;
   const b = new Date(birthDate), n = new Date();
