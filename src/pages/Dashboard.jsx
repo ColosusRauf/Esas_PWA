@@ -1,5 +1,6 @@
 import React from "react";
 import { CalendarPlus, CalendarCheck, Flame } from "lucide-react";
+import ClinicalAlert from "../components/ClinicalAlert.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import { streaks } from "../insights.js";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -34,6 +35,7 @@ export default function Dashboard({ patientId, assessments, onNavigate, onLogout
   return (
     <Layout active="dashboard" patientId={patientId} onNavigate={onNavigate} onLogout={onLogout}
       title={t("dash.hello", { id: patientId })} subtitle={t("dash.sub")}>
+      <ClinicalAlert assessments={assessments} />
       <div className="grid-2 fit-top">
         <Card bodyStyle={{ justifyContent: "space-between", gap: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>

@@ -9,6 +9,10 @@ import Settings from "./pages/Settings.jsx";
 import Privacy, { CONSENT_VERSION } from "./pages/Privacy.jsx";
 import ConsentGate from "./components/ConsentGate.jsx";
 import ForcePassword from "./components/ForcePassword.jsx";
+import Tour from "./components/Tour.jsx";
+import IdleWarning from "./components/IdleWarning.jsx";
+import Help from "./pages/Help.jsx";
+import { useIdle } from "./useIdle.js";
 import Celebrate from "./components/Celebrate.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { encouragement } from "./insights.js";
@@ -58,6 +62,7 @@ export default function App() {
   const [syncState, setSyncState] = useState({ status: "idle", error: null, lastSync: null });
   const [consent, setConsent] = useState({ known: false, consented: false, at: null });
   const [celebrate, setCelebrate] = useState(null);
+  const [tour, setTour] = useState(false);
   const [notFound, setNotFound] = useState(() => typeof location !== "undefined" && !["/", "/index.html"].includes(location.pathname));
   const push = usePush(patientId);
   const recordsRef = useRef(records);
@@ -213,6 +218,26 @@ export default function App() {
 
   const assessments = useMemo(() => records.map(toAssessment), [records]);
   const pending = assessments.filter((a) => !a.synced).length;
+
+  // D4: keluar otomatis bila tidak aktif (ditunda selama masih ada data belum terkirim)
+  const idle = useIdle({
+    enabled: !!session,
+    idleMs: (isStaff ? 20 : 30) * 60 * 1000,
+    warnMs: 60 * 1000,
+    canLogout: pending === 0,
+    onTimeout: () => { logoutRef.current(); toast(t("idle.done")); },
+  });
+
+  // B3: tur pertama kali (setelah persetujuan dan ganti password)
+  const mustChangeNow = !!patientId && session?.mustChange === true;
+  useEffect(() => {
+    if (!patientId || !consent.consented || mustChangeNow) return;
+    try { if (!localStorage.getItem(`esas.tour.${patientId}`)) setTour(true); } catch {}
+  }, [patientId, consent.consented, mustChangeNow]);
+  const closeTour = useCallback(() => {
+    try { if (patientId) localStorage.setItem(`esas.tour.${patientId}`, "1"); } catch {}
+    setTour(false);
+  }, [patientId]);
   const ctx = useMemo(() => ({
     patientId, assessments, navigate, logout, online, navState, push, consent, passwordChanged,
     ready: records.length > 0 || syncState.lastSync != null,
@@ -220,7 +245,12 @@ export default function App() {
   }), [patientId, assessments, navigate, logout, online, navState, push, consent, passwordChanged, records.length, syncState, pending]);
 
   if (notFound) return <NotFound onHome={() => { try { history.replaceState(null, "", "/"); } catch {} setNotFound(false); }} />;
-  if (isStaff) return <AdminApp session={session} onLogout={logout} />;
+  if (isStaff) return (
+    <>
+      <AdminApp session={session} onLogout={logout} />
+      {idle.left != null && <IdleWarning left={idle.left} onStay={idle.stay} onLogout={logout} />}
+    </>
+  );
   if (!PUBLIC_VIEWS.includes(view) && !patientId) return <Login onLogin={login} {...loginState} onBack={() => navigate("landing")} onPrivacy={() => navigate("privacy")} />;
 
   const common = { patientId, onNavigate: navigate, onLogout: logout };
@@ -246,6 +276,9 @@ export default function App() {
     case "settings":
       page = <Settings {...common} />;
       break;
+    case "help":
+      page = <Help {...common} onTour={() => setTour(true)} />;
+      break;
     default:
       return <Landing onGetStarted={() => navigate("login")} onLogin={() => navigate("login")} onPrivacy={() => navigate("privacy")} />;
   }
@@ -256,6 +289,8 @@ export default function App() {
     <AppContext.Provider value={ctx}>
       {page}
       {celebrate && !mustChange && !gated && <Celebrate info={celebrate} onClose={() => setCelebrate(null)} />}
+      {tour && !mustChange && !gated && !celebrate && view !== "privacy" && <Tour onClose={closeTour} />}
+      {idle.left != null && <IdleWarning left={idle.left} onStay={idle.stay} onLogout={logout} />}
       {mustChange && <ForcePassword onDone={passwordChanged} onLogout={logout} />}
       {gated && <ConsentGate onAccept={acceptConsent} onLogout={logout} onReadPolicy={() => navigate("privacy")} />}
     </AppContext.Provider>

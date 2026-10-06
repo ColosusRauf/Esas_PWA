@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search, Bell, User, LayoutDashboard, ClipboardList, History as HistoryIcon, Settings as SettingsIcon,
-  ShieldCheck, CalendarDays, HeartPulse, X, Activity, AlertTriangle, CloudUpload, BellRing, CalendarPlus,
+  ShieldCheck, CalendarDays, HeartPulse, X, Activity, AlertTriangle, CloudUpload, BellRing, CalendarPlus, CircleHelp,
 } from "lucide-react";
 import { useApp } from "../appContext.jsx";
 import { useLang } from "../i18n.jsx";
@@ -16,6 +16,7 @@ const PAGES = [
   { key: "history", label: "nav.history", icon: HistoryIcon, kw: "riwayat history grafik chart bandingkan compare" },
   { key: "profile", label: "nav.profile", icon: User, kw: "profil profile akun account" },
   { key: "settings", label: "nav.settings", icon: SettingsIcon, kw: "pengaturan settings tema gelap dark theme bahasa language pengingat reminder notifikasi pasang install" },
+  { key: "help", label: "nav.help", icon: CircleHelp, kw: "bantuan help faq panduan guide tur tour cara how" },
   { key: "privacy", label: "nav.privacy", icon: ShieldCheck, kw: "privasi privacy persetujuan consent data" },
 ];
 
@@ -202,6 +203,7 @@ function BellMenu() {
 
 export default function Topbar({ patientId }) {
   const { t } = useLang();
+  const app = useApp();
   const [ms, setMs] = useState(false); // kotak cari terbuka (HP)
   function openSearch() {
     setMs((v) => !v);
@@ -218,6 +220,7 @@ export default function Topbar({ patientId }) {
         <button className="m-only icon-btn tb-circle" aria-label={t("search.aria")} onClick={openSearch}>
           {ms ? <X size={19} /> : <Search size={19} />}
         </button>
+        <button className="icon-btn tb-circle" aria-label={t("nav.help")} title={t("nav.help")} onClick={() => app.navigate("help")}><CircleHelp size={19} /></button>
         <BellMenu />
         <div className="user-chip" style={{
           display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", border: "1px solid var(--border)",

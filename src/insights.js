@@ -43,3 +43,27 @@ export function encouragement(assessments) {
   }
   return { kind, total, current, severe: maxV >= 7, maxV };
 }
+
+// A3: peringatan klinis dari pengisian terbaru.
+//  urgent = ada gejala >= 7 pada pengisian terakhir (dalam 3 hari terakhir)
+//  watch  = gejala yang >= 5 pada 3 pengisian berturut-turut (berulang)
+export function clinicalAlert(assessments) {
+  const last = assessments[assessments.length - 1];
+  if (!last) return null;
+  const ageDays = Math.round((new Date(todayKeyWIB() + "T00:00:00Z") - new Date(dayKeyWIB(last.createdAt) + "T00:00:00Z")) / 864e5);
+  if (ageDays > 3) return null;
+  const severe = [];
+  last.answers.forEach((v, i) => { if (v >= 7) severe.push({ i, v }); });
+  const persistent = [];
+  const three = assessments.slice(-3);
+  if (three.length === 3) {
+    last.answers.forEach((_, i) => {
+      if (three.every((a) => a.answers[i] >= 5) && !severe.some((s) => s.i === i)) persistent.push({ i, v: last.answers[i] });
+    });
+  }
+  const level = severe.length ? "urgent" : persistent.length ? "watch" : null;
+  if (!level) return null;
+  // indeks 5 = sesak napas, indeks 0 = nyeri
+  const emergency = severe.some((s) => (s.i === 5 && s.v >= 7) || (s.i === 0 && s.v >= 9));
+  return { level, severe: severe.sort((a, b) => b.v - a.v), persistent, emergency, id: last.id };
+}
