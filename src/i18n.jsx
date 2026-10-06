@@ -351,6 +351,11 @@ const D = {
   "nf.text": ["Alamat yang Anda buka tidak ada atau sudah dipindahkan.", "The address you opened doesn't exist or has moved."],
   "nf.home": ["Kembali ke beranda", "Back to home"],
 
+  // --- item 10: gejala lain ---
+  "as.other.label": ["Gejala apa yang Anda rasakan?", "Which symptom do you feel?"],
+  "as.other.ph": ["Contoh: sembelit, gatal, pusing", "Example: constipation, itching, dizziness"],
+  "as.other.hint": ["Wajib diisi bila skor lebih dari 0.", "Required when the score is above 0."],
+
   // --- A3 peringatan klinis ---
   "al.urgent.title": ["Ada gejala yang berat", "You have severe symptoms"],
   "al.urgent.text": ["Pengisian terakhir mencatat: {names}. Sebaiknya segera hubungi tenaga kesehatan Anda.", "Your last check-in recorded: {names}. Please contact your healthcare team soon."],

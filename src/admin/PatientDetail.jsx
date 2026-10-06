@@ -3,7 +3,7 @@ import { Card, StatCard, Empty, th, td, ghostBtn, primaryBtn, inputStyle, PageTi
 import { Modal, randomPassword, fieldLabel } from "./Modal.jsx";
 import * as api from "../api.js";
 import { TrendChart } from "./charts.jsx";
-import { DOMAINS, severity, SEV_COLOR, SEV_LABEL } from "../data.js";
+import { DOMAINS, severity, SEV_COLOR, SEV_LABEL, symLabel } from "../data.js";
 import { withTotal, fmtDate, dayKey, keyLabel, mean, r1, ageOf } from "./stats.js";
 import { Activity, ClipboardCheck, TrendingUp } from "lucide-react";
 
@@ -55,7 +55,7 @@ export default function PatientDetail({ id, byId, assessments, onBack, isAdmin, 
                 <tbody>
                   {DOMAINS.map((d, i) => (
                     <tr key={d.key}>
-                      <td style={td}>{d.label.split(" (")[0]}</td>
+                      <td style={td}>{d.key === "lainnya" && recent.some((a) => a.otherSymptom) ? `Lainnya: ${[...new Set(recent.map((a) => a.otherSymptom).filter(Boolean))].join(", ")}` : d.label.split(" (")[0]}</td>
                       {recent.map((a) => {
                         const v = a.answers[i];
                         return <td key={a.clientId} style={{ ...td, color: SEV_COLOR[severity(v)], fontWeight: 600 }} title={SEV_LABEL[severity(v)]}>{v}</td>;
@@ -84,7 +84,7 @@ export default function PatientDetail({ id, byId, assessments, onBack, isAdmin, 
                 <thead><tr><th style={th}>Tanggal</th><th style={th}>Total skor</th><th style={th}>Gejala berat (&gt; 6)</th></tr></thead>
                 <tbody>
                   {[...list].reverse().map((a) => {
-                    const sev = DOMAINS.map((d, i) => ({ l: d.label.split(" (")[0], v: a.answers[i] })).filter((s) => s.v > 6);
+                    const sev = DOMAINS.map((d, i) => ({ l: symLabel(d, a, d.label.split(" (")[0], "full"), v: a.answers[i] })).filter((s) => s.v > 6);
                     return (
                       <tr key={a.clientId}>
                         <td style={td}>{fmtDate(a.createdAt)}</td>

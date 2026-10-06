@@ -13,9 +13,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ items: await listAssessments(patientId) });
     }
     if (req.method === "POST") {
-      const { clientId, answers } = req.body || {};
+      const { clientId, answers, otherSymptom } = req.body || {};
       if (!isUuid(clientId) || !isAnswers(answers)) return res.status(400).json({ error: "BAD_REQUEST" });
-      const created = await createAssessment(patientId, clientId, answers);
+      // nama gejala item ke-10: teks pendek tanpa karakter kontrol; hanya disimpan bila skornya > 0
+      let other = null;
+      if (typeof otherSymptom === "string") {
+        const v = otherSymptom.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+        if (v && answers[9] > 0) other = v;
+      }
+      const created = await createAssessment(patientId, clientId, answers, other);
       if (created) {
         await logActivity({
           actor: patientId, role: "patient", action: "SUBMIT_ASSESSMENT", target: patientId,

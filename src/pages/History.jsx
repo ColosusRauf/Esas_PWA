@@ -10,7 +10,7 @@ import { useMobile } from "../useMedia.js";
 import EmptyState from "../components/EmptyState.jsx";
 import { tipsFor } from "../tips.js";
 import RecordCard from "../components/RecordCard.jsx";
-import { DOMAINS, totalOf, severity, SEV_COLOR, SEV_LABEL_L } from "../data.js";
+import { DOMAINS, totalOf, severity, SEV_COLOR, SEV_LABEL_L, symLabel } from "../data.js";
 import { fmtDate, dayKeyWIB, todayKeyWIB } from "../format.js";
 
 const PRESETS = [["all", "hi.f.all"], ["7", "hi.f.7"], ["30", "hi.f.30"], ["90", "hi.f.90"]];
@@ -161,7 +161,7 @@ mobile ? (
 
 function Detail({ item }) {
   const { t, lang } = useLang();
-  const data = DOMAINS.map((d, i) => ({ name: shortName(d, lang), value: item.answers[i] }));
+  const data = DOMAINS.map((d, i) => ({ name: symLabel(d, item, shortName(d, lang)), value: item.answers[i] }));
   return (
     <Card title={t("hi.totalTitle", { date: fmtDate(item.createdAt, lang), n: totalOf(item.answers) })}>
       <div className="tiles" style={{ display: "grid", gap: 10, marginBottom: "clamp(10px, 2vh, 20px)", flexShrink: 0 }}>
@@ -170,14 +170,14 @@ function Detail({ item }) {
           const sev = severity(v);
           return (
             <div key={d.key} style={{ border: "1px solid var(--border)", borderRadius: 14, padding: "clamp(8px, 1.4vh, 13px) 14px" }}>
-              <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{shortName(d, lang)}</div>
+              <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={symLabel(d, item, shortName(d, lang), "full")}>{symLabel(d, item, shortName(d, lang))}</div>
               <div style={{ fontSize: 20, fontWeight: 700, color: SEV_COLOR[sev], lineHeight: 1.1 }}>{v}</div>
               <div style={{ fontSize: 12.5, color: SEV_COLOR[sev], marginTop: 3 }}>{SEV_LABEL_L[lang][sev]}</div>
             </div>
           );
         })}
       </div>
-      <Tips answers={item.answers} />
+      <Tips answers={item.answers} other={item.otherSymptom} />
       <div className="chart-box" role="img" aria-label={t("hi.chartAria")}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
@@ -196,7 +196,7 @@ function Detail({ item }) {
 }
 
 // Tips untuk gejala yang skornya >= 4 (maksimal 3 gejala tertinggi)
-function Tips({ answers }) {
+function Tips({ answers, other }) {
   const { t, lang } = useLang();
   const list = DOMAINS.map((d, i) => ({ d, v: answers[i] })).filter((x) => x.v >= 4).sort((a, b) => b.v - a.v).slice(0, 3);
   if (!list.length) return null;
@@ -205,7 +205,7 @@ function Tips({ answers }) {
       <summary>{t("tips.title")} ({list.length})</summary>
       {list.map(({ d, v }) => (
         <div key={d.key} className="tips-item">
-          <b style={{ color: SEV_COLOR[severity(v)] }}>{shortName(d, lang)} ({v})</b>
+          <b style={{ color: SEV_COLOR[severity(v)] }}>{symLabel(d, { otherSymptom: other }, shortName(d, lang))} ({v})</b>
           <ul>{tipsFor(d.key, lang).map((x, i) => <li key={i}>{x}</li>)}</ul>
         </div>
       ))}
@@ -254,7 +254,7 @@ function Compare({ a, b }) {
           <tbody>
             {rows.map(({ d, va, vb, diff }) => (
               <tr key={d.key}>
-                <td>{shortName(d, lang)}</td>
+                <td>{d.key === "lainnya" && (a.otherSymptom || b.otherSymptom) ? `${shortName(d, lang)}: ${[...new Set([a.otherSymptom, b.otherSymptom].filter(Boolean))].join(" / ")}` : shortName(d, lang)}</td>
                 <td style={{ color: SEV_COLOR[severity(va)], fontWeight: 600 }}>{va}</td>
                 <td style={{ color: SEV_COLOR[severity(vb)], fontWeight: 600 }}>{vb}</td>
                 <td><Delta d={diff} /></td>

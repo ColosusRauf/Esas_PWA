@@ -11,13 +11,16 @@ export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }
   const { t, lang } = useLang();
   const [page, setPage] = useState(0);
   const [answers, setAnswers] = useState(Array(DOMAINS.length).fill(null));
+  const [other, setOther] = useState("");
 
   const start = page * PER_PAGE;
   const pageItems = DOMAINS.slice(start, start + PER_PAGE);
   const answeredCount = answers.filter((v) => v !== null).length;
   const pct = (answeredCount / DOMAINS.length) * 100;
   const isLastPage = page === PAGES - 1;
-  const pageComplete = pageItems.every((_, i) => answers[start + i] !== null);
+  const otherIdx = DOMAINS.findIndex((d) => d.key === "lainnya");
+  const otherOk = answers[otherIdx] === 0 || other.trim().length > 0; // bila skor > 0, nama gejala wajib
+  const pageComplete = pageItems.every((_, i) => answers[start + i] !== null) && (!pageItems.some((d) => d.key === "lainnya") || otherOk);
 
   function setAnswer(idx, v) {
     const next = [...answers];
@@ -26,7 +29,7 @@ export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }
   }
 
   function handleNext() {
-    if (isLastPage) onSubmit(answers);
+    if (isLastPage) onSubmit(answers, answers[otherIdx] > 0 ? other.trim().slice(0, 60) : null);
     else setPage(page + 1);
   }
 
@@ -73,6 +76,14 @@ export default function Assessment({ patientId, onNavigate, onLogout, onSubmit }
                   <span>{dLo(d, lang)}</span>
                   <span>{dHi(d, lang)}</span>
                 </div>
+                {d.key === "lainnya" && v > 0 && (
+                  <div className="other-field">
+                    <label htmlFor="other-sym">{t("as.other.label")}</label>
+                    <input id="other-sym" value={other} maxLength={60} onChange={(e) => setOther(e.target.value)}
+                      placeholder={t("as.other.ph")} autoComplete="off" aria-required="true" aria-invalid={!other.trim()} />
+                    {!other.trim() && <small>{t("as.other.hint")}</small>}
+                  </div>
+                )}
                 </div>
               </div>
             );

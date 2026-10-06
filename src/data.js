@@ -34,3 +34,12 @@ export const SEV_LABEL_L = {
   id: { ringan: "Ringan", sedang: "Sedang", berat: "Berat" },
   en: { ringan: "Mild", sedang: "Moderate", berat: "Severe" },
 };
+
+// Nama gejala untuk item "Lainnya": bila pasien menuliskan gejalanya, tampilkan itu.
+//  mode "short" -> "sembelit"; mode "full" -> "Lainnya: sembelit"
+export const otherName = (d, rec) => (d.key === "lainnya" && rec?.otherSymptom ? rec.otherSymptom : null);
+export const symLabel = (d, rec, base, mode = "short") => {
+  const o = otherName(d, rec);
+  if (!o) return base;
+  return mode === "full" ? `${base}: ${o}` : o;
+};

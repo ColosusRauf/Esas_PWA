@@ -40,7 +40,7 @@ function save(key, value) {
 }
 
 // record: { clientId, createdAt, answers, synced }
-const toAssessment = (r) => ({ id: r.clientId, createdAt: r.createdAt, answers: r.answers, synced: !!r.synced });
+const toAssessment = (r) => ({ id: r.clientId, createdAt: r.createdAt, answers: r.answers, otherSymptom: r.otherSymptom || null, synced: !!r.synced });
 const byDate = (a, b) => String(a.createdAt).localeCompare(String(b.createdAt));
 const PUBLIC_VIEWS = ["landing", "login", "privacy"];
 
@@ -201,8 +201,8 @@ export default function App() {
     toast(t("pw.done"));
   }, [t, toast]);
 
-  function submitAssessment(answers) {
-    const rec = { clientId: crypto.randomUUID(), createdAt: new Date().toISOString(), answers, synced: false };
+  function submitAssessment(answers, otherSymptom = null) {
+    const rec = { clientId: crypto.randomUUID(), createdAt: new Date().toISOString(), answers, otherSymptom: answers[9] > 0 ? otherSymptom : null, synced: false };
     setRecords((prev) => [...prev, rec]);
     setCelebrate(encouragement([...recordsRef.current, rec].map(toAssessment)));
     toast(online ? t("toast.saved") : t("toast.savedOffline"));

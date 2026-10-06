@@ -1,4 +1,4 @@
-import { DOMAINS, totalOf } from "../data.js";
+import { DOMAINS, totalOf, symLabel } from "../data.js";
 
 export const TZ = "Asia/Jakarta";
 export const dayKey = (iso) => new Date(iso).toLocaleDateString("sv-SE", { timeZone: TZ }); // YYYY-MM-DD (WIB)
@@ -82,10 +82,10 @@ export function latestByPatient(items) {
 
 // Gejala dengan skor > 6 (pita "berat" yang sama dengan sisi pasien)
 export const severeSymptoms = (a) =>
-  DOMAINS.map((d, i) => ({ label: d.label.split(" (")[0], v: a.answers[i] })).filter((s) => s.v > 6).sort((x, y) => y.v - x.v);
+  DOMAINS.map((d, i) => ({ label: symLabel(d, a, d.label.split(" (")[0], "full"), v: a.answers[i] })).filter((s) => s.v > 6).sort((x, y) => y.v - x.v);
 
 export const topSymptom = (a) => {
-  const s = DOMAINS.map((d, i) => ({ label: d.label.split(" (")[0], v: a.answers[i] })).sort((x, y) => y.v - x.v)[0];
+  const s = DOMAINS.map((d, i) => ({ label: symLabel(d, a, d.label.split(" (")[0], "full"), v: a.answers[i] })).sort((x, y) => y.v - x.v)[0];
   return s;
 };
 
@@ -113,6 +113,7 @@ export function dictionaryCsv() {
     ["lengkap", "tanggal", "tanggal", "Tanggal pengisian, zona waktu WIB", "YYYY-MM-DD"],
     ["lengkap", "waktu_wib", "waktu", "Jam pengisian, zona waktu WIB", "HH:MM"],
     ...DOMAINS.map((d) => ["lengkap", d.key, "angka", `Skor gejala: ${d.label}`, `0 = ${d.lo}; 10 = ${d.hi}`]),
+    ["lengkap", "gejala_lain", "teks", "Nama gejala yang ditulis pasien pada item Lainnya (kosong bila skor 0)", ""],
     ["lengkap", "total_skor", "angka", "Jumlah 10 skor gejala", `0-${DOMAINS.length * 10}`],
     ["ringkasan", "patient_id", "teks", "Kode pasien", ""],
     ["ringkasan", "jumlah_assessment", "angka", "Banyak pengisian pada rentang tanggal", ""],
@@ -145,12 +146,13 @@ const esc = (v) => {
 const toCsv = (rows) => rows.map((r) => r.map(esc).join(",")).join("\r\n");
 
 export function fullCsv(items) {
-  const head = ["patient_id", "tanggal", "waktu_wib", ...DOMAINS.map((d) => d.key), "total_skor"];
+  const head = ["patient_id", "tanggal", "waktu_wib", ...DOMAINS.map((d) => d.key), "gejala_lain", "total_skor"];
   const rows = withTotal(items).map((a) => [
     a.patientId,
     dayKey(a.createdAt),
     new Date(a.createdAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: TZ }),
     ...a.answers,
+    a.otherSymptom || "",
     a.total,
   ]);
   return toCsv([head, ...rows]);

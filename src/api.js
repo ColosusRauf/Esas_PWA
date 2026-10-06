@@ -42,8 +42,8 @@ export const login = (id, password, role = "patient") =>
 
 // pasien
 export const listAssessments = async () => (await call("/api/assessments")).items;
-export const createAssessment = ({ clientId, answers }) =>
-  call("/api/assessments", { method: "POST", body: { clientId, answers } });
+export const createAssessment = ({ clientId, answers, otherSymptom }) =>
+  call("/api/assessments", { method: "POST", body: { clientId, answers, otherSymptom: otherSymptom || undefined } });
 export const getConsent = () => call("/api/consent");
 export const postConsent = (version) => call("/api/consent", { method: "POST", body: { version } });
 export const changePassword = (oldPassword, newPassword) => call("/api/password", { method: "POST", body: { oldPassword, newPassword } });

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TriangleAlert, MessageCircle, Phone, X } from "lucide-react";
 import { useLang } from "../i18n.jsx";
-import { DOMAINS, dShort } from "../data.js";
+import { DOMAINS, dShort, symLabel } from "../data.js";
 import { clinicalAlert } from "../insights.js";
 import { CONTACT } from "../contact.js";
 
@@ -14,7 +14,7 @@ export default function ClinicalAlert({ assessments }) {
   const al = clinicalAlert(assessments);
   const [hideId, setHideId] = useState(hidden);
   if (!al || (al.level === "watch" && hideId === al.id) || (al.level === "urgent" && hideId === al.id)) return null;
-  const names = (al.level === "urgent" ? al.severe : al.persistent).slice(0, 3).map((x) => `${dShort(DOMAINS[x.i], lang)} ${x.v}`).join(", ");
+  const names = (al.level === "urgent" ? al.severe : al.persistent).slice(0, 3).map((x) => `${symLabel(DOMAINS[x.i], assessments[assessments.length - 1], dShort(DOMAINS[x.i], lang))} ${x.v}`).join(", ");
   const wa = String(CONTACT.phone || "").replace(/\D/g, "");
   const close = () => { try { localStorage.setItem(KEY, al.id); } catch {} setHideId(al.id); };
   return (

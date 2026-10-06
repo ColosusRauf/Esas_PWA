@@ -50,8 +50,8 @@ export async function verifyLogin(patientId, password) {
 export async function listAssessments(patientId) {
   let rows;
   if (useSupabase()) {
-    const q = `assessments?patient_id=eq.${encodeURIComponent(patientId)}&select=client_id,answers,created_at&order=created_at.asc`;
-    rows = (await sb(q)).map((r) => ({ clientId: r.client_id, createdAt: r.created_at, answers: r.answers }));
+    const q = `assessments?patient_id=eq.${encodeURIComponent(patientId)}&select=client_id,answers,created_at,other_symptom&order=created_at.asc`;
+    rows = (await sb(q)).map((r) => ({ clientId: r.client_id, createdAt: r.created_at, answers: r.answers, otherSymptom: r.other_symptom || null }));
   } else {
     rows = rowsOf(await n8n("esas-assessments-list", { patientId }));
   }
@@ -59,16 +59,16 @@ export async function listAssessments(patientId) {
 }
 
 // -> true jika baru tersimpan, false jika ternyata kiriman ulang (duplikat)
-export async function createAssessment(patientId, clientId, answers) {
+export async function createAssessment(patientId, clientId, answers, otherSymptom = null) {
   if (useSupabase()) {
     const rows = await sb("assessments?on_conflict=client_id", {
       method: "POST",
       headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
-      body: JSON.stringify({ patient_id: patientId, client_id: clientId, answers }),
+      body: JSON.stringify({ patient_id: patientId, client_id: clientId, answers, other_symptom: otherSymptom }),
     });
     return Array.isArray(rows) && rows.length > 0;
   }
-  const res = await n8n("esas-assessments-create", { patientId, clientId, answers });
+  const res = await n8n("esas-assessments-create", { patientId, clientId, answers, otherSymptom });
   return res?.created !== false;
 }
 
@@ -127,9 +127,9 @@ export async function listAllAssessments() {
     // Supabase membatasi 1000 baris per permintaan -> ambil bertahap
     for (let offset = 0; offset < 50000; offset += 1000) {
       const page = await sb(
-        `assessments?select=client_id,patient_id,answers,created_at&order=created_at.asc&limit=1000&offset=${offset}`
+        `assessments?select=client_id,patient_id,answers,created_at,other_symptom&order=created_at.asc&limit=1000&offset=${offset}`
       );
-      rows.push(...page.map((r) => ({ clientId: r.client_id, patientId: r.patient_id, createdAt: r.created_at, answers: r.answers })));
+      rows.push(...page.map((r) => ({ clientId: r.client_id, patientId: r.patient_id, createdAt: r.created_at, answers: r.answers, otherSymptom: r.other_symptom || null })));
       if (page.length < 1000) break;
     }
   } else {
